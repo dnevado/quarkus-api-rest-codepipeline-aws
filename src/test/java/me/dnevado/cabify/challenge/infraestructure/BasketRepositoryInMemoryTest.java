@@ -1,12 +1,8 @@
-package me.javigs82.basket.infraestructure;
+package me.dnevado.cabify.challenge.infraestructure;
 
 import io.quarkus.test.junit.QuarkusTest;
-import me.javigs82.basket.domain.model.Basket;
-import me.javigs82.basket.domain.model.Discount;
-import me.javigs82.basket.domain.model.Item;
-import me.javigs82.basket.infrastructure.BasketRepositoryInMemory;
-import me.javigs82.basket.infrastructure.DiscountAdapter;
-import me.javigs82.basket.infrastructure.ItemAdapter;
+import me.dnevado.cabify.challenge.domain.model.ReturnMessage;
+import me.dnevado.cabify.challenge.infrastructure.CabifyRepositoryInMemory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -18,18 +14,12 @@ import java.util.Optional;
 public class BasketRepositoryInMemoryTest {
 
     @Inject
-    BasketRepositoryInMemory basketRepository;
-
-    @Inject
-    ItemAdapter itemAdapter;
-
-    @Inject
-    DiscountAdapter discountAdapter;
-
+    CabifyRepositoryInMemory cabifyRepository;
+    /* 
     @Test
-    public void testCreateBasket() {
-        Optional<Basket> basket = createBasket();
-        basket.ifPresentOrElse(b1 -> {
+    public void testcreateAvailableCars() {
+        Optional<ReturnMessage> cars = createAvailableCars();
+        cars.ifPresentOrElse(b1 -> {
                     this.basketRepository
                             .getBasketByCode(b1.getCode())
                             .ifPresentOrElse(b2 -> {
@@ -45,7 +35,7 @@ public class BasketRepositoryInMemoryTest {
 
     @Test
     public void testDeleteBasket() {
-        Optional<Basket> basket = createBasket();
+        Optional<CarsOld> basket = createBasket();
         basket.ifPresentOrElse(b1 -> {
                     this.basketRepository
                             .deleteBasket(b1.getCode())
@@ -58,7 +48,7 @@ public class BasketRepositoryInMemoryTest {
 
     @Test
     public void testDeleteBasketNotExist() {
-        Optional<Basket> basketDeleted = this.basketRepository
+        Optional<CarsOld> basketDeleted = this.basketRepository
                 .deleteBasket("not_exist_code");
         basketDeleted.ifPresentOrElse(
                 b -> Assertions.fail(),
@@ -68,7 +58,7 @@ public class BasketRepositoryInMemoryTest {
 
     @Test
     public void testGetBasketByCode() {
-        Optional<Basket> basketCreated = createBasket();
+        Optional<CarsOld> basketCreated = createBasket();
         basketCreated.ifPresentOrElse(
                 b1 -> this.basketRepository
                         .getBasketByCode(b1.getCode()).ifPresentOrElse(
@@ -81,7 +71,7 @@ public class BasketRepositoryInMemoryTest {
 
     @Test
     public void testGetBasketByCodeNotExist() {
-        Optional<Basket> basketGot = this.basketRepository
+        Optional<CarsOld> basketGot = this.basketRepository
                 .getBasketByCode("not_exist_code");
         basketGot.ifPresentOrElse(
                 b -> Assertions.fail(),
@@ -91,7 +81,7 @@ public class BasketRepositoryInMemoryTest {
 
     @Test
     public void testAddItemToBasket() {
-        Optional<Basket> basketCreated = createBasket();
+        Optional<CarsOld> basketCreated = createBasket();
         Optional<Item> item = this.itemAdapter.getItemByCode("TSHIRT");
         basketCreated.ifPresent(b -> {
             item.ifPresent(i -> {
@@ -108,8 +98,8 @@ public class BasketRepositoryInMemoryTest {
     @Test
     public void testAddItemWithDiscountToBasket() {
         String itemCode = "TSHIRT";
-        Optional<Discount> discount = this.discountAdapter.getItemByItemCode(itemCode);
-        Optional<Basket> basketCreated = createBasket();
+        Optional<Journeys> discount = this.discountAdapter.getItemByItemCode(itemCode);
+        Optional<CarsOld> basketCreated = createBasket();
         Optional<Item> item = this.itemAdapter.getItemByCode(itemCode);
         basketCreated.ifPresent(b -> {
             item.ifPresent(i -> {
@@ -129,9 +119,9 @@ public class BasketRepositoryInMemoryTest {
     @Test
     public void testAddItemWithNODiscountToBasket() {
         String itemCode = "CHELO";
-        Optional<Basket> basketCreated = createBasket();
+        Optional<CarsOld> basketCreated = createBasket();
         Optional<Item> itemGot = this.itemAdapter.getItemByCode(itemCode);
-        Optional<Discount> discount = this.discountAdapter.getItemByItemCode(itemCode);
+        Optional<Journeys> discount = this.discountAdapter.getItemByItemCode(itemCode);
         basketCreated.ifPresent(basket -> {
             itemGot.ifPresent(item -> {
                 this.basketRepository.addItemToBasket(basket.getCode(), item, discount)
@@ -150,7 +140,7 @@ public class BasketRepositoryInMemoryTest {
 
     @Test
     public void testGetPriceOneItemToBasket() {
-        Optional<Basket> basketCreated = createBasket();
+        Optional<CarsOld> basketCreated = createBasket();
         Optional<Item> item = this.itemAdapter.getItemByCode("TSHIRT");
         basketCreated.ifPresent(b -> {
             item.ifPresent(i -> {
@@ -165,7 +155,7 @@ public class BasketRepositoryInMemoryTest {
         });
     }
 
-    private Optional<Basket> createBasket() {
-        return this.basketRepository.createBasket("This is my basket");
-    }
+    private Optional<ReturnMessage> createAvailableCars() {
+        return this.cabifyRepository.createAvailableCars("This is my basket");
+    }*/
 }

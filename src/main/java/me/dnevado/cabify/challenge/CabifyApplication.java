@@ -1,13 +1,15 @@
-package me.javigs82.basket;
+package me.dnevado.cabify.challenge;
 
 import io.quarkus.vertx.web.Route;
 import io.quarkus.vertx.web.RouteBase;
 import io.quarkus.vertx.web.RoutingExchange;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.mutiny.core.eventbus.EventBus;
-import me.javigs82.basket.domain.AddItemToBasketEvent;
-import me.javigs82.basket.domain.model.Basket;
-import me.javigs82.basket.domain.BasketService;
+import me.dnevado.cabify.challenge.domain.AddItemToBasketEvent;
+import me.dnevado.cabify.challenge.domain.CabifyService;
+import me.dnevado.cabify.challenge.domain.model.Car;
+import me.dnevado.cabify.challenge.domain.model.ReturnMessage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +27,7 @@ import javax.json.bind.JsonbBuilder;
 
 @ApplicationScoped
 @RouteBase(produces = "application/json")
-public class BasketApplication {
+public class CabifyApplication {
 
     private final Logger log = LoggerFactory.getLogger(getClass().getName());
 
@@ -33,23 +35,69 @@ public class BasketApplication {
     private EventBus bus;
 
     @Inject
-    private BasketService basketService;
-
-
-    @Route(path = "/basket", methods = HttpMethod.POST)
-    void createBasket(RoutingExchange ex) {
-        log.info("POST /basket/");
-        bus.<Basket>request("create-basket-event", "")
-                .subscribeAsCompletionStage()
-                .thenAccept(s -> ex.ok(JsonbBuilder.create().toJson(s.body())));
+    private CabifyApplication cabifyApplication;
+    
+    private String  _CARS_MESSAGGE = "create-available-cars";
+    private String  _JOURNEY_MESSAGGE = "create-journey";
+    private String  _STATUS_MESSAGGE = "status";
+    private String  _DROPOFF_MESSAGGE = "dropoff";
+    private String  _LOCATE_MESSAGGE = "locate";
+    
+    
+    
+    @Route(path = "/journey", methods = HttpMethod.POST)
+    void journey(RoutingExchange ex) {
+        log.info("POST /journey/");       
+        bus.<ReturnMessage>request(_JOURNEY_MESSAGGE, "")
+        .subscribeAsCompletionStage()
+        .thenAccept(s -> ex.ok(JsonbBuilder.create().toJson(s.body())));
     }
-
+    
+    @Route(path = "/dropoff", methods = HttpMethod.POST)
+    void dropoff(RoutingExchange ex) {
+        log.info("POST /dropoff/"); 
+        bus.<ReturnMessage>request(_DROPOFF_MESSAGGE, "")
+        .subscribeAsCompletionStage()
+        .thenAccept(s -> ex.ok(JsonbBuilder.create().toJson(s.body())));
+    }
+    
+    @Route(path = "/locate:id", methods = HttpMethod.POST)
+    void locate(RoutingExchange ex) {
+        log.info("post /locate/");
+        String id = ex.getParam("id").get();
+        bus.<ReturnMessage>request(_LOCATE_MESSAGGE, id)
+        .subscribeAsCompletionStage()
+        .thenAccept(s -> {
+            if (s.body() != null) {
+                ex.ok(JsonbBuilder.create().toJson(s.body()));
+            } else {
+                ex.notFound().end("");
+            }
+        });
+    }
+    
+    @Route(path = "/status", methods = HttpMethod.GET)
+    void getStatus(RoutingExchange ex) {    	
+        log.info("get /status/");       
+         bus.<ReturnMessage>request(_STATUS_MESSAGGE, "")
+         .subscribeAsCompletionStage()
+        .thenAccept(s -> ex.ok(JsonbBuilder.create().toJson(s.body()))); 
+    }
+    
+    @Route(path = "/cars", methods = HttpMethod.PUT)
+    void createAvailableCars(RoutingExchange ex) {
+        log.info("PUT /cars/");
+        bus.<ReturnMessage>request(_CARS_MESSAGGE, "")
+        .subscribeAsCompletionStage()
+        .thenAccept(s -> ex.ok(JsonbBuilder.create().toJson(s.body())));
+    }
+/* 
     //If basket is not present then throw 404.
     @Route(path = "/basket/:code", methods = HttpMethod.DELETE)
     void deleteBasket(RoutingExchange ex) {
         String code = ex.getParam("code").get();
         log.info("DELETE /basket/{}", code);
-        bus.<Basket>request("delete-basket-event", code)
+        bus.<CarsOld>request("delete-basket-event", code)
                 .subscribeAsCompletionStage()
                 .thenAccept(s -> {
                     if (s.body() != null) {
@@ -65,7 +113,7 @@ public class BasketApplication {
     void getBasketByCode(RoutingExchange ex) {
         String code = ex.getParam("code").get();
         log.info("GET /basket/{}", code);
-        bus.<Basket>request("get-basket-event", code)
+        bus.<CarsOld>request("get-basket-event", code)
                 .subscribeAsCompletionStage()
                 .thenAccept(s -> {
                     if (s.body() != null) {
@@ -83,7 +131,7 @@ public class BasketApplication {
         String itemCode = ex.getParam("itemCode").get();
         log.info("GET /basket/{}/item/{}", code, itemCode);
         AddItemToBasketEvent event = new AddItemToBasketEvent(code,itemCode);
-        bus.<Basket>request("add-item-basket-event", event)
+        bus.<CarsOld>request("add-item-basket-event", event)
                 .subscribeAsCompletionStage()
                 .thenAccept(s -> {
                     if (s.body() != null) {
@@ -92,6 +140,6 @@ public class BasketApplication {
                         ex.notFound().end("");
                     }
                 });
-    }
+    }*/
 
 }

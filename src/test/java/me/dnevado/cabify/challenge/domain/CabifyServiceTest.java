@@ -1,7 +1,10 @@
-package me.javigs82.basket.domain;
+package me.dnevado.cabify.challenge.domain;
 
 import io.quarkus.test.junit.QuarkusTest;
-import me.javigs82.basket.domain.model.Basket;
+import me.dnevado.cabify.challenge.domain.AddItemToBasketEvent;
+import me.dnevado.cabify.challenge.domain.CabifyService;
+import me.dnevado.cabify.challenge.domain.model.ReturnMessage;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -10,21 +13,21 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 
 @QuarkusTest
-public class BasketServiceTest {
+public class CabifyServiceTest {
 
     @Inject
-    BasketService basketService;
-
+    CabifyService cabifyService;
+    /*
     @Test
-    public void testCreateBasket() throws ExecutionException, InterruptedException {
-        CompletionStage<Basket> cs = createBasket();
+    public void createCars() throws ExecutionException, InterruptedException {
+        CompletionStage<ReturnMessage> cs = createAvailableCars();
         cs.thenAccept(b -> Assertions.assertTrue(b.getCode() != null && b.getCode() != ""))
                 .toCompletableFuture().get();
     }
-
+ 
     @Test
     public void testDeleteBasket() throws ExecutionException, InterruptedException {
-        Basket createdBasket = createBasket().toCompletableFuture().get();
+        CarsOld createdBasket = createBasket().toCompletableFuture().get();
             this.basketService.deleteBasket(createdBasket.getCode())
                     .thenAccept(deletedBasket ->
                             Assertions.assertEquals(deletedBasket.getCode(), createdBasket.getCode())
@@ -41,7 +44,7 @@ public class BasketServiceTest {
 
     @Test
     public void testGetBasketByCode() throws ExecutionException, InterruptedException {
-        Basket basketCreated = createBasket().toCompletableFuture().get();
+        CarsOld basketCreated = createBasket().toCompletableFuture().get();
         this.basketService.getBasketByCode(basketCreated.getCode()).thenAccept(
                 basketGot -> Assertions.assertEquals(basketCreated.getCode(), basketGot.getCode())
         ).toCompletableFuture().get();
@@ -88,9 +91,9 @@ public class BasketServiceTest {
                 .thenAccept(basket ->
                         Assertions.assertEquals(basket,null ))
                 .toCompletableFuture().get();
-    }
+    }*/
 
-    private CompletionStage<Basket> createBasket() {
-        return this.basketService.createBasket("");
+    private CompletionStage<ReturnMessage> createAvailableCars() {
+        return this.cabifyService.createAvailableCars("");
     }
 }

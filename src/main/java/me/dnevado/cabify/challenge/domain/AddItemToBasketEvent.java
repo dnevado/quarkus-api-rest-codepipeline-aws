@@ -1,4 +1,4 @@
-package me.javigs82.basket.domain;
+package me.dnevado.cabify.challenge.domain;
 
 //Events for vertx
 public final class AddItemToBasketEvent {

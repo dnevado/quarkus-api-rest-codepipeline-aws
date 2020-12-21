@@ -1,7 +1,9 @@
-package me.javigs82.basket;
+package me.dnevado.cabify.challenge;
 
 import io.quarkus.test.junit.QuarkusTest;
-import me.javigs82.basket.domain.model.Basket;
+import me.dnevado.cabify.challenge.domain.model.Car;
+import me.dnevado.cabify.challenge.domain.model.ReturnMessage;
+
 import org.junit.jupiter.api.Test;
 
 import javax.json.bind.JsonbBuilder;
@@ -10,28 +12,40 @@ import static io.restassured.RestAssured.given;
 
 
 @QuarkusTest
-public class BasketApplicationTest {
+public class CabifyApplicationTest {
 
     @Test
-    public void testCreateBasketEndpoint() {
+    public void testCreateCarsEndpoint() {
         given()
-                .when().post("/basket")
+                .when().put("/cars")
                 .then()
                 .statusCode(200);
     }
 
     @Test
-    public void testDeleteBasketEndpoint() {
-        //create basket
-        Basket basket = createBasket();
-        //delete created
+    public void testServiceStatus() {
+    	
         given()
-                .when().delete("/basket/" + basket.getCode())
+                .when().get("/status")
                 .then()
                 .statusCode(200);
+        
 
     }
+    
+    @Test
+    public void testDropOff() {
+    	
+        given()
+                .when().post("/dropoff")
+                .then()
+                .statusCode(200);
+        
 
+    }
+ 
+ 
+ /*
     @Test //only test if does not exist
     public void testDeleteBasketNotFoundEndpoint() {
         String delete404 = "not_exist_basket";
@@ -44,7 +58,7 @@ public class BasketApplicationTest {
     @Test
     public void testGetBasketByCodeEndpoint() {
         //create one
-        Basket basket = createBasket();
+        CarsOld basket = createBasket();
         //getById
         given()
                 .when().get("/basket/" + basket.getCode())
@@ -66,7 +80,7 @@ public class BasketApplicationTest {
     @Test
     public void testAddItemToBasketEndpoint() {
         //create one
-        Basket basket = createBasket();
+        CarsOld basket = createBasket();
         //getById
         given()
                 .when().put("/basket/" + basket.getCode() + "/item/PEN")
@@ -86,7 +100,7 @@ public class BasketApplicationTest {
     @Test
     public void testAddItemNotExistToBasketEndpoint() {
         //create one
-        Basket basket = createBasket();
+        CarsOld basket = createBasket();
         String item404 = "not_exist_item";
         //getById
         given()
@@ -98,7 +112,7 @@ public class BasketApplicationTest {
     @Test
     public void testAddItemNotExistToBasketNotFoundEndpoint() {
         //create one
-        Basket basket = createBasket();
+        CarsOld basket = createBasket();
         String item404 = "not_exist_item";
         //getById
         given()
@@ -106,14 +120,14 @@ public class BasketApplicationTest {
                 .then()
                 .statusCode(404);
     }
+*/
 
-
-    private Basket createBasket() {
+    private ReturnMessage createCars() {
         return JsonbBuilder.create().fromJson(
                 given()
-                        .when().post("/basket")
+                        .when().post("/cars")
                         .then()
-                        .extract().response().asString(), Basket.class);
+                        .extract().response().asString(), ReturnMessage.class);
     }
 
 }
