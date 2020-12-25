@@ -57,6 +57,9 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
     @Override
     public Optional<ReturnMessage> createAvailableCars(JsonArray availablecars) {
         log.trace("createAvailableCars {}", availablecars);      
+        availableCars.clear();
+        peopleGroups.clear();        
+        journeyCars.clear();              
         ReturnMessage message = new ReturnMessage("1","1");
         for (int i = 0; i < availablecars.size(); i++) {
         	JsonObject jsonCar = availablecars.getJsonObject(i);        	
@@ -81,13 +84,23 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
     }
     
     @Override
-    public Optional<ReturnMessage> dropOff() {
-        log.trace("dropOff");        
-        availableCars.clear();
-        peopleGroups.clear();        
-        journeyCars.clear();        
-        ReturnMessage message;
-        message =  new ReturnMessage("200","OK");        
+    public Optional<ReturnMessage> dropOff(Long groupId) {
+    	log.trace("assignJourney {}", groupId);
+        ReturnMessage message = new ReturnMessage("404", "Not Found");        
+        if (this.journeyCars.containsKey(groupId))
+        {
+        	JourneyCar journey = this.journeyCars.get(groupId);
+        	this.journeyCars.remove(groupId);
+        	Car foundCar = availableCars.get(journey.getCarId());
+        	Long  groupSize  = peopleGroups.get(groupId);    
+        	peopleGroups.remove(groupId);
+        	message.setStatusCode("200");
+    		message.setStatusDescription("OK");    		
+    		// add  new available cars seats
+    		int finalReservedSeats = foundCar.getReservedSeats() - groupSize.intValue();
+    		foundCar.setReservedSeats(finalReservedSeats); 
+    		availableCars.put(foundCar.getCarId(), foundCar);        	
+        }        
         return Optional.of(message);
     }
     

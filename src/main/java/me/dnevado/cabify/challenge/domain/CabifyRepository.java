@@ -14,6 +14,6 @@ public interface CabifyRepository {
     Optional<ReturnMessage> assignJourney(JsonObject journey);
     Optional<ReturnMessage> locateJourney(Long groupId);
     Optional<ReturnMessage> serviceStatus();
-    Optional<ReturnMessage> dropOff();
+    Optional<ReturnMessage> dropOff(Long groupId);
 
 }
