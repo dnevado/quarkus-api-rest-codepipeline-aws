@@ -2,9 +2,9 @@ package me.dnevado.cabify.challenge.domain.model;
 
 public class ReturnMessage {
 
-    private final String statusCode;    
+    private String statusCode;    
     //amount of seats 
-    private final String statusDescription;
+    private String statusDescription;
     
 
     public ReturnMessage(String statusCode, String statusDescription) {
@@ -12,12 +12,26 @@ public class ReturnMessage {
         this.statusDescription = statusDescription;        
     }
 
-    public String getStatusCode() {
-        return statusCode;
-    }
 
-    public String getStatusDescription() {
-        return statusDescription;
-    }
+	public String getStatusCode() {
+		return statusCode;
+	}
+
+
+	public void setStatusCode(String statusCode) {
+		this.statusCode = statusCode;
+	}
+
+
+	public String getStatusDescription() {
+		return statusDescription;
+	}
+
+
+	public void setStatusDescription(String statusDescription) {
+		this.statusDescription = statusDescription;
+	}
+
+  
 
 }

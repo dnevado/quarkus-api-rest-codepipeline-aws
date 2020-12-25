@@ -3,17 +3,27 @@ package me.dnevado.cabify.challenge.infrastructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
+
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import me.dnevado.cabify.challenge.domain.CabifyRepository;
 import me.dnevado.cabify.challenge.domain.model.Car;
+import me.dnevado.cabify.challenge.domain.model.Group;
+import me.dnevado.cabify.challenge.domain.model.JourneyCar;
 import me.dnevado.cabify.challenge.domain.model.ReturnMessage;
 
 import javax.enterprise.context.ApplicationScoped;
+
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+
+import java.util.Map;
+import java.util.stream.Stream;
 
 @ApplicationScoped
 public class CabifyRepositoryInMemory implements CabifyRepository {
@@ -23,28 +33,35 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
     /* id car
      * available seats 
      */
-    private final Map<String, Long> availableCars = new ConcurrentHashMap<>();    
+    
+    
+    /* use of thread safe to preserve order and atomic operations instead of ConcurrentHashMap */    
+    private final Map<Long, Car> availableCars = Collections.synchronizedMap(new LinkedHashMap<Long, Car>());
+
+    //private final Map<String, Long> availableCars = new ConcurrentHashMap<>();    
     /* id group 
      * group people  
      */
-    private final Map<String, Long> journeys = new ConcurrentHashMap<>();
+    /* use of thread safe to preserve order and atomic operations instead of ConcurrentHashMap */    
+    private final Map<Long, Long> peopleGroups = Collections.synchronizedMap(new LinkedHashMap<Long, Long>());
+    //private final Map<String, Long> journeys = new ConcurrentHashMap<>();
     
     /*  id group  
      *  id car
      */
-    private final Map<String, Long> journeyCars = new ConcurrentHashMap<>();
+    /* use of thread safe to preserve order and atomic operations instead of ConcurrentHashMap */    
+    private final Map<Long, JourneyCar> journeyCars = Collections.synchronizedMap(new LinkedHashMap<Long, JourneyCar>());
+    //private final Map<String, Long> journeyCars = new ConcurrentHashMap<>();
  
-
+    
     @Override
     public Optional<ReturnMessage> createAvailableCars(JsonArray availablecars) {
         log.trace("createAvailableCars {}", availablecars);      
         ReturnMessage message = new ReturnMessage("1","1");
         for (int i = 0; i < availablecars.size(); i++) {
-        	JsonObject jsonCar = availablecars.getJsonObject(i);
-        	String id = jsonCar.getString("id");
-        	Long seats  = jsonCar.getLong("seats");        	
-        	availableCars.put(id,seats);
-        	
+        	JsonObject jsonCar = availablecars.getJsonObject(i);        	
+        	Car  car = new Gson().fromJson(jsonCar.toString(), Car.class);        	        
+        	availableCars.put(car.getCarId(),car);        	
         }
         return Optional.of(message);
     }
@@ -58,7 +75,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
         if (serviceOK)
         	message =  new ReturnMessage("200","OK");
         else
-             message = new ReturnMessage("201","NOOK");
+            message = new ReturnMessage("201","NOOK");
         
         return Optional.of(message);
     }
@@ -67,30 +84,66 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
     public Optional<ReturnMessage> dropOff() {
         log.trace("dropOff");        
         availableCars.clear();
-        journeys.clear();        
+        peopleGroups.clear();        
         journeyCars.clear();        
         ReturnMessage message;
         message =  new ReturnMessage("200","OK");        
         return Optional.of(message);
     }
-
-
+    
+    /* return 
+     * 		carId if assigned or -1 
+     */
+    private long isReachable(Car car, short neededSeats)
+    {
+    	long carId = -1;
+    	// availibilty 
+    	if (car.getAvailableSeats() -car.getReservedSeats()>=neededSeats)
+    		carId = car.getCarId();
+    	return carId;
+    }
+    
 	@Override
 	public Optional<ReturnMessage> assignJourney(JsonObject journey) {
 		// TODO Auto-generated method stub
-		return null;
+        log.trace("assignJourney {}", journey);
+        ReturnMessage message = new ReturnMessage("400", "Bad Request");
+        Group  group = new Gson().fromJson(journey.toString(), Group.class);              
+        // order preserved                 
+        long foundCarId = -1;
+        for (Long carKey : availableCars.keySet()) {        	
+        	foundCarId =  isReachable(availableCars.get(carKey),group.getPeople());   
+        	if (foundCarId!=-1)
+        	{
+        		message.setStatusCode("200");
+        		message.setStatusDescription("OK");
+        		Car foundCar = availableCars.get(carKey);
+        		// reduce available cars seats
+        		int finalReservedSeats = foundCar.getReservedSeats() + group.getPeople();
+        		foundCar.setReservedSeats(finalReservedSeats);
+        		// add journey to people
+        		JourneyCar journeyCar = new JourneyCar(foundCarId, group.getId());
+        		journeyCars.put(group.getId(), journeyCar);
+        		break;
+        	}
+        }
+        
+        
+                
+        return Optional.of(message);
 	}
 
 
 	@Override
-	public Optional<ReturnMessage> locateJourney(String journeyId) {
+	public Optional<ReturnMessage> locateJourney(Long groupId) {
 		// TODO Auto-generated method stub
-        log.trace("locateJourney {}", journeyId);
+        log.trace("locateJourney {}", groupId);
         ReturnMessage message = null;
-        Long  carId ; 
-        if (this.journeyCars.containsKey(journeyId))
+        Long  carId; 
+        if (this.journeyCars.containsKey(groupId))
         {
-        	carId = this.journeyCars.get(journeyId);
+        	JourneyCar journey = this.journeyCars.get(groupId);
+        	carId = journey.getCarId();
         	message =  new ReturnMessage("200", String.valueOf(carId));
         }
         return Optional.of(message);

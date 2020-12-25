@@ -79,51 +79,13 @@ public class CabifyService {
     }
     
     @ConsumeEvent(value = "locate")
-    public CompletionStage<ReturnMessage> locate(String journeyId) {
-        log.debug("getting locate by code {}", journeyId);
+    public CompletionStage<ReturnMessage> locate(Long groupId) {
+        log.debug("getting locate by code {}", groupId);
         return CompletableFuture.supplyAsync(() ->
-                this.cabifyRepository.locateJourney(journeyId).orElse(null)
+                this.cabifyRepository.locateJourney(groupId).orElse(null)
         );
     }
     
-    /* 
-    private String  _CARS_MESSAGGE = "create-available-cars";
-    private String  _JOURNEY_MESSAGGE = "create-journey";
-    private String  _STATUS_MESSAGGE = "status";
-    private String  _DROPOFF_MESSAGGE = "dropoff";
-    private String  _LOCATE_MESSAGGE = "locate";
-    
-    
-    Optional<ReturnMessage> assignJourney(JsonObject journey);
-    Optional<ReturnMessage> locateJourney(String journeyId);
-    Optional<ReturnMessage> serviceStatus();
-    Optional<ReturnMessage> dropOff();
-    
-    
-    //calculate here final price to ensure final price comes from server
-    @ConsumeEvent(value = "get-basket-event")
-    public CompletionStage<CarsOld> getBasketByCode(String code) {
-        log.debug("getting basket by code {}", code);
-        return CompletableFuture.supplyAsync(() ->
-                this.basketRepository.getBasketByCode(code).orElse(null)
-        );
-    }
-
-    @ConsumeEvent(value = "add-item-basket-event")
-    public CompletionStage<CarsOld> addItemBasket(AddItemToBasketEvent event) {
-        log.debug("adding item {} to basket {}", event.itemCode, event.basketCode);
-        //check if item exists
-        Optional<Item> item = this.itemPort.getItemByCode(event.itemCode);
-        if (!item.isPresent())
-            return CompletableFuture.completedFuture(null);
-
-        Optional<Journeys> discount = this.discountPort.getItemByItemCode(item.get().getCode());
-        log.debug("getting discount from item basket {}", event.basketCode);
-        return CompletableFuture.supplyAsync(() ->
-                this.basketRepository
-                        .addItemToBasket(event.basketCode, item.get(), discount)
-                        .orElse(null)
-        );
-    }*/
+   
 
 }
