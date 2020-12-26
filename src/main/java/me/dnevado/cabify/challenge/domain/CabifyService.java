@@ -47,7 +47,7 @@ public class CabifyService {
         car2.put("seats", 69);
         cars.add(car2);
         return CompletableFuture.supplyAsync(() ->
-                this.cabifyRepository.createAvailableCars(cars).get()
+                this.cabifyRepository.createAvailableCars(event).get()
         );
     }
     
@@ -66,7 +66,7 @@ public class CabifyService {
         journey.put("id", "5");
         journey.put("people", 93);         
         return CompletableFuture.supplyAsync(() ->
-                this.cabifyRepository.assignJourney(journey).get()
+                this.cabifyRepository.assignJourney(event).get()
         );
     }
     
@@ -74,15 +74,15 @@ public class CabifyService {
     public CompletionStage<ReturnMessage> dropOff(String event) {
         log.debug("dropoff");
         return CompletableFuture.supplyAsync(() ->
-             this.cabifyRepository.dropOff().orElse(null)
+             this.cabifyRepository.dropOff(event).orElse(null)
         );
     }
     
     @ConsumeEvent(value = "locate")
-    public CompletionStage<ReturnMessage> locate(Long groupId) {
-        log.debug("getting locate by code {}", groupId);
+    public CompletionStage<ReturnMessage> locate(String event) {
+        log.debug("getting locate by code {}", event);
         return CompletableFuture.supplyAsync(() ->
-                this.cabifyRepository.locateJourney(groupId).orElse(null)
+                this.cabifyRepository.locateJourney(event).orElse(null)
         );
     }
     

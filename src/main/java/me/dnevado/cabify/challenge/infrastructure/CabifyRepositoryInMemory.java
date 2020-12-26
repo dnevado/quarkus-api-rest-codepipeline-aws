@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-
+import java.util.regex.Pattern;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -30,11 +30,13 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
 
     private final Logger log = LoggerFactory.getLogger(getClass().getName());
 
+    
+    /* True : when cars processing is over and ready */
+    private  boolean serviceReady = Boolean.TRUE;
+
     /* id car
      * available seats 
-     */
-    
-    
+     */	
     /* use of thread safe to preserve order and atomic operations instead of ConcurrentHashMap */    
     private final Map<Long, Car> availableCars = Collections.synchronizedMap(new LinkedHashMap<Long, Car>());
 
@@ -52,20 +54,41 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
     /* use of thread safe to preserve order and atomic operations instead of ConcurrentHashMap */    
     private final Map<Long, JourneyCar> journeyCars = Collections.synchronizedMap(new LinkedHashMap<Long, JourneyCar>());
     //private final Map<String, Long> journeyCars = new ConcurrentHashMap<>();
- 
+    
+        
     
     @Override
-    public Optional<ReturnMessage> createAvailableCars(JsonArray availablecars) {
-        log.trace("createAvailableCars {}", availablecars);      
-        availableCars.clear();
-        peopleGroups.clear();        
-        journeyCars.clear();              
-        ReturnMessage message = new ReturnMessage("1","1");
-        for (int i = 0; i < availablecars.size(); i++) {
-        	JsonObject jsonCar = availablecars.getJsonObject(i);        	
-        	Car  car = new Gson().fromJson(jsonCar.toString(), Car.class);        	        
-        	availableCars.put(car.getCarId(),car);        	
+    public Optional<ReturnMessage> createAvailableCars(String availablecars) {
+    	/* blocking process */
+    	serviceReady = Boolean.FALSE;
+        log.trace("createAvailableCars {}", availablecars); 
+        ReturnMessage message = new ReturnMessage("200","OK");
+        // avoiding overritten of original variable in case of error 
+        Map<Long, Car> temporaryAvailableCars = Collections.synchronizedMap(new LinkedHashMap<Long, Car>());
+        /* Previous validation of all car entries before processing  */ 
+        try 
+        {
+            JsonArray jAvailablecars  = new JsonArray(availablecars);        
+            for (int i = 0; i < jAvailablecars.size(); i++) {
+            	JsonObject jsonCar = jAvailablecars.getJsonObject(i);        	
+            	Car  car = new Gson().fromJson(jsonCar.toString(), Car.class);        	        
+            	temporaryAvailableCars.put(car.getCarId(),car);        	
+            }
+            // everything OK?
+            availableCars.clear();
+            peopleGroups.clear();        
+            journeyCars.clear();
+            availableCars.putAll(temporaryAvailableCars);
+            temporaryAvailableCars.clear();
+            serviceReady =  Boolean.TRUE;
         }
+        catch (Exception e)
+        {        	
+        	message.setStatusCode("400");
+    		message.setStatusDescription("Bad Request");
+    		serviceReady =  Boolean.TRUE;
+        }   
+       
         return Optional.of(message);
     }
 
@@ -73,7 +96,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
     @Override
     public Optional<ReturnMessage> serviceStatus() {
         log.trace("serviceStatus");        
-        boolean serviceOK = availableCars.size() > 0;
+        boolean serviceOK = !serviceReady; // up and running 
         ReturnMessage message;
         if (serviceOK)
         	message =  new ReturnMessage("200","OK");
@@ -83,24 +106,59 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
         return Optional.of(message);
     }
     
+    private boolean isNumeric(String value)
+    {
+    	return  Stream.of(value)
+                .filter(s -> s != null && !s.isEmpty())
+                .filter(Pattern.compile("\\D").asPredicate().negate())
+                .mapToLong(Long::valueOf)
+                .boxed()
+                .findAny()
+                .isPresent();
+    }
+    
+    /* 
+     * 200 OK or 204 No Content When the group is unregistered correctly.
+	   404 Not Found When the group is not to be found.
+	   400 Bad Request When there is a failure in the request format or the 	payload can't be unmarshalled.
+     */
     @Override
-    public Optional<ReturnMessage> dropOff(Long groupId) {
+    public Optional<ReturnMessage> dropOff(String groupId) {    	
     	log.trace("assignJourney {}", groupId);
-        ReturnMessage message = new ReturnMessage("404", "Not Found");        
-        if (this.journeyCars.containsKey(groupId))
+        ReturnMessage message = new ReturnMessage("404", "Not Found");
+        Long parsedGroupId;
+        try 
         {
-        	JourneyCar journey = this.journeyCars.get(groupId);
-        	this.journeyCars.remove(groupId);
-        	Car foundCar = availableCars.get(journey.getCarId());
-        	Long  groupSize  = peopleGroups.get(groupId);    
-        	peopleGroups.remove(groupId);
-        	message.setStatusCode("200");
-    		message.setStatusDescription("OK");    		
-    		// add  new available cars seats
-    		int finalReservedSeats = foundCar.getReservedSeats() - groupSize.intValue();
-    		foundCar.setReservedSeats(finalReservedSeats); 
-    		availableCars.put(foundCar.getCarId(), foundCar);        	
-        }        
+    	    if (!isNumeric(groupId))
+            {
+	           	message.setStatusCode("400");
+	      		message.setStatusDescription("Bad Request");
+      		
+            }    	    
+    	    else
+    	    {
+    	    	parsedGroupId = Long.getLong(groupId);
+    	    	if (this.journeyCars.containsKey(parsedGroupId))
+    	        {
+    	        	JourneyCar journey = this.journeyCars.get(parsedGroupId);
+    	        	this.journeyCars.remove(parsedGroupId);
+    	        	Car foundCar = availableCars.get(journey.getCarId());
+    	        	Long  groupSize  = peopleGroups.get(parsedGroupId);    
+    	        	peopleGroups.remove(parsedGroupId);
+    	        	message.setStatusCode("200");
+    	    		message.setStatusDescription("OK");    		
+    	    		// add  new available cars seats
+    	    		int finalReservedSeats = foundCar.getReservedSeats() - groupSize.intValue();
+    	    		foundCar.setReservedSeats(finalReservedSeats); 
+    	    		availableCars.put(foundCar.getCarId(), foundCar);        	
+    	        }
+    	    }
+        }
+	    catch (Exception e)
+	    {
+	    	message.setStatusCode("400");
+      		message.setStatusDescription("Bad Request");
+	    }
         return Optional.of(message);
     }
     
@@ -116,49 +174,111 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
     	return carId;
     }
     
+    /* 
+     * 200 OK or 202 Accepted When the group is registered correctly
+	   400 Bad Request When there is a failure in the request format or the
+		payload can't be unmarshalled.
+    */
 	@Override
-	public Optional<ReturnMessage> assignJourney(JsonObject journey) {
+	public Optional<ReturnMessage> assignJourney(String journey) {
 		// TODO Auto-generated method stub
         log.trace("assignJourney {}", journey);
-        ReturnMessage message = new ReturnMessage("400", "Bad Request");
-        Group  group = new Gson().fromJson(journey.toString(), Group.class);              
-        // order preserved                 
-        long foundCarId = -1;
-        for (Long carKey : availableCars.keySet()) {        	
-        	foundCarId =  isReachable(availableCars.get(carKey),group.getPeople());   
-        	if (foundCarId!=-1)
-        	{
-        		message.setStatusCode("200");
-        		message.setStatusDescription("OK");
-        		Car foundCar = availableCars.get(carKey);
-        		// reduce available cars seats
-        		int finalReservedSeats = foundCar.getReservedSeats() + group.getPeople();
-        		foundCar.setReservedSeats(finalReservedSeats);
-        		// add journey to people
-        		JourneyCar journeyCar = new JourneyCar(foundCarId, group.getId());
-        		journeyCars.put(group.getId(), journeyCar);
-        		break;
-        	}
+        ReturnMessage message = new ReturnMessage("200", "OK");
+        Long parsedJourneyId;       
+        try 
+        {        	
+	        if (!isNumeric(journey))
+	        {
+	           	message.setStatusCode("400");
+	      		message.setStatusDescription("Bad Request");
+	  		
+	        }    	    
+		    else
+		    {
+		    	parsedJourneyId = Long.getLong(journey);        
+		        Group  group = new Gson().fromJson(parsedJourneyId.toString(), Group.class);              
+		        // order preserved                 
+		        long foundCarId = -1;
+		        for (Long carKey : availableCars.keySet()) {        	
+		        	foundCarId =  isReachable(availableCars.get(carKey),group.getPeople());   
+		        	if (foundCarId!=-1)
+		        	{
+		        		message.setStatusCode("200");
+		        		message.setStatusDescription("OK");
+		        		Car foundCar = availableCars.get(carKey);
+		        		// reduce available cars seats
+		        		int finalReservedSeats = foundCar.getReservedSeats() + group.getPeople();
+		        		foundCar.setReservedSeats(finalReservedSeats);
+		        		// add journey to people
+		        		JourneyCar journeyCar = new JourneyCar(foundCarId, group.getId());
+		        		journeyCars.put(group.getId(), journeyCar);
+		        		break;
+		        	}
+		        }
+		    }
+		}
+		catch (Exception e)
+        {
+	    	message.setStatusCode("400");
+	  		message.setStatusDescription("Bad Request");
         }
-        
-        
-                
+                        
         return Optional.of(message);
 	}
 
+	/* 
+	 * 200 OK With the car as the payload when the group is assigned to a car.
 
+	204 No Content When the group is waiting to be assigned to a car.
+	
+	404 Not Found When the group is not to be found.
+	
+	400 Bad Request When there is a failure in the request format or the
+	payload can't be unmarshalled.
+	 */
 	@Override
-	public Optional<ReturnMessage> locateJourney(Long groupId) {
+	public Optional<ReturnMessage> locateJourney(String groupId) {
 		// TODO Auto-generated method stub
         log.trace("locateJourney {}", groupId);
-        ReturnMessage message = null;
-        Long  carId; 
-        if (this.journeyCars.containsKey(groupId))
+        ReturnMessage message = new ReturnMessage("400", "Bad Request");
+        Long parsedGroupId;
+        try 
         {
-        	JourneyCar journey = this.journeyCars.get(groupId);
-        	carId = journey.getCarId();
-        	message =  new ReturnMessage("200", String.valueOf(carId));
+    	    if (isNumeric(groupId))
+    	    {
+    	    	 parsedGroupId = Long.getLong(groupId);
+    	    	 if (!this.peopleGroups.containsKey(parsedGroupId))
+		         {	
+    	    		 	message.setStatusCode("404");
+    	    		 	message.setStatusDescription("Not Found");
+		         }
+    	    	 else
+    	    	 {   
+    	    		  // assigned or not 
+			    	  Long  carId; 
+			          if (this.journeyCars.containsKey(parsedGroupId))
+			          {
+				          JourneyCar journey = this.journeyCars.get(parsedGroupId);
+				          carId = journey.getCarId();
+				          message.setStatusCode("200");
+	    	    		  message.setStatusDescription(String.valueOf(carId));				          
+			          }
+			          else
+			          {
+			        	  message.setStatusCode("204");
+	    	    		  message.setStatusDescription("No Content");
+			          }
+    	    	 }
+		          
+    	    }
+	    }
+		catch (Exception e)
+        {
+	    	message.setStatusCode("400");
+	  		message.setStatusDescription("Bad Request");
         }
+        
+      
         return Optional.of(message);
 	}
 
