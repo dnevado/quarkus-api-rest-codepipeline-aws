@@ -1,4 +1,4 @@
-image: connorbutch/gradle-and-java-11:alpha
+image: dnevado/gradle-and-java-11:alpha
 
 variables:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
@@ -31,11 +31,11 @@ build:
 
 docker:
   stage: docker
-  script:
+  script:docker build -t registry.gitlab.com/cabify-challenge/car-pooling-challenge-dnevado .
     - cd car-pooling-challenge-dnevado
-    - docker build -f src/main/docker/Dockerfile.jvm -t registry.gitlab.com/dnevado/car-pooling-challenge-dnevado:$CI_COMMIT_SHORT_SHA  .
+    - docker build -f src/main/docker/Dockerfile.jvm -t registry.gitlab.com/cabify-challenge/car-pooling-challenge-dnevado:$CI_COMMIT_SHORT_SHA  .
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker push registry.gitlab.com/dnevado/car-pooling-challenge-dnevado:$CI_COMMIT_SHORT_SHA
+    - docker push registry.gitlab.com/cabify-challenge/car-pooling-challenge-dnevado:$CI_COMMIT_SHORT_SHA
     
 ## Uncomment the acceptance step and do not remove or edit, this step is
 ## required for us to accept your submission!
