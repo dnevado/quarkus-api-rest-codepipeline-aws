@@ -67,6 +67,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
         Map<Long, Car> temporaryAvailableCars = Collections.synchronizedMap(new LinkedHashMap<Long, Car>());
         /* Previous validation of all car entries before processing  */ 
         boolean syntaxError = Boolean.FALSE;
+        boolean previousAssigned = Boolean.FALSE;
         try 
         {
             JsonArray jAvailablecars  = new JsonArray(availablecars);
@@ -74,7 +75,13 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
             	JsonObject jsonCar = jAvailablecars.getJsonObject(i);        	
             	Car  car = new Gson().fromJson(jsonCar.toString(), Car.class);
             	syntaxError = !(car.getCarId()!=0 &&  car.getReservedSeats() ==0 && car.getAvailableSeats()>0);
-            	if (!syntaxError)
+            	// exists and assgined , not permitted  
+            	if (availableCars.containsKey(car.getCarId()))
+            	{
+            		Car existingCar = availableCars.get(car.getCarId());
+            		previousAssigned = existingCar.getReservedSeats() >0;
+            	}	
+            	if (!syntaxError && !previousAssigned)
             		temporaryAvailableCars.put(car.getCarId(),car);
             	else
             	{
