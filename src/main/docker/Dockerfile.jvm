@@ -44,7 +44,9 @@ RUN microdnf install curl ca-certificates ${JAVA_PACKAGE} \
 
 # Configure the JAVA_OPTIONS, you can add -XshowSettings:vm to also display the heap size.
 ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
-# Setup JAVA_HOME -- useful for docker commandline
+# Set the JAVA_HOME variable to make it clear where Java is located
+ENV JAVA_HOME /etc/alternatives/jre
+
 ENV JAVA_HOME /usr/bin/java
 RUN export JAVA_HOME
 	
