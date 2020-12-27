@@ -1,4 +1,4 @@
-image: dnevado/gradle-and-java-11:alpha
+#image: dnevado/gradle-and-java-11:alpha
 
 variables:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
