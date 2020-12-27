@@ -2,72 +2,43 @@ image: connorbutch/gradle-and-java-11:alpha
 
 variables:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
-  
+
 before_script:
-  - export GRADLE_USER_HOME=`pwd`/.gradle  
+  - export GRADLE_USER_HOME=`pwd`/.gradle
 
 services:
-  - docker:stable-dind  
-  
+  - docker:stable-dind
+
 stages:
   - build
   - docker
   - acceptance
 
-## Uncomment the following sections to enable docker, image building and
-## acceptance
 
 build:
-   stage: build
-   script: ./gradlew check
-   cache:
-        key: "$CI_COMMIT_REF_NAME"
-        policy: pull
-        paths:
-          - build
-          - .gradle
-build:
-   stage: build
-   script:
-    - ./gradlew clean build
-   cache:
-        key: "$CI_COMMIT_REF_NAME"
-        policy: push
-        paths:
-          - build
-          - .gradle
-    artifacts:
-        paths:
-            - car-pooling-challenge-dnevado/build/
+  stage: build
+  script:    
+    - ./gradlew clean build 
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: push
+    paths:
+      - build
+      - .gradle
+  artifacts:
+    paths:
+      - car-pooling-challenge-dnevado/build/
+
 docker:
   stage: docker
   script:
     - cd car-pooling-challenge-dnevado
-    # - docker build -f src/main/docker/Dockerfile.jvm -t quarkus/car-pooling-challenge-dnevado-jvm .
-    - docker build -f src/main/docker/Dockerfile.jvm -t registry.gitlab.com/dnevado/car-pooling-challenge-dnevado:$CI_COMMIT_SHORT_SHA  .  
-    #- docker build -f infrastructure/Dockerfile -t registry.gitlab.com/connorbutch/reading-comprehension:$CI_COMMIT_SHORT_SHA  .
+    - docker build -f src/main/docker/Dockerfile.jvm -t registry.gitlab.com/dnevado/car-pooling-challenge-dnevado:$CI_COMMIT_SHORT_SHA  .
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker push registry.gitlab.com/dnevado/car-pooling-challenge-dnevado:$CI_COMMIT_SHORT_SHA            
-            
-# build_image:
-#   stage: docker
-#   image: docker:latest
-#   variables:
-#     DOCKER_DRIVER: overlay2
-#     DOCKER_TLS_CERTDIR: ""
-#     DOCKER_HOST: tcp://docker:2375/
-#   services:
-#     - docker:dind
-#   script:
-#     - echo As a helper here you have a sample of how to build and push a \
-#     docker image to the provided gitlab registry.
-#     - echo ${CI_JOB_TOKEN} | docker login --password-stdin -u ${CI_REGISTRY_USER} ${CI_REGISTRY}
-#     - docker build . -t ${CI_REGISTRY_IMAGE}:latest
-#     - docker push ${CI_REGISTRY_IMAGE}:latest
-
+    - docker push registry.gitlab.com/dnevado/car-pooling-challenge-dnevado:$CI_COMMIT_SHORT_SHA
+	
 ## Uncomment the acceptance step and do not remove or edit, this step is
 ## required for us to accept your submission!
-
 # acceptance:
 #   image: cabify/challenge:latest
 #   stage: acceptance
