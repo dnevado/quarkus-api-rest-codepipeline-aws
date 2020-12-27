@@ -74,7 +74,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
             for (int i = 0; i < jAvailablecars.size(); i++) {
             	JsonObject jsonCar = jAvailablecars.getJsonObject(i);        	
             	Car  car = new Gson().fromJson(jsonCar.toString(), Car.class);
-            	syntaxError = !(car.getCarId()!=0 &&  car.getReservedSeats() ==0 && car.getAvailableSeats()>0);
+            	syntaxError = !(car.getCarId()!=0 &&  car.getReservedSeats() ==0 && car.getAvailableSeats()>3 && car.getAvailableSeats()<=6);
             	// exists and assgined , not permitted  
             	if (availableCars.containsKey(car.getCarId()))
             	{
@@ -207,9 +207,10 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
         ReturnMessage message = new ReturnMessage("200", "OK");
         try 
         {        		      	    	       
-	        Group  group = new Gson().fromJson(journey, Group.class);
-	        boolean syntaxError = !(group.getId()!=0 &&  group.getPeople()>0);
-        	if (syntaxError)
+	        Group  group = new Gson().fromJson(journey, Group.class);	        
+	        boolean syntaxError = !(group.getId()!=0 &&  group.getPeople()>0 && group.getPeople()<=6);	      
+	        boolean previousAssigned = !syntaxError && peopleGroups.containsKey(group.getId());
+        	if (syntaxError || previousAssigned)
         	{
         		message.setStatusCode("400");
         		message.setStatusDescription("Bad Request");
@@ -307,22 +308,5 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
         return Optional.of(message);
 	}
 
-/*    @Override
-    public Optional<CarsOld> getBasketByCode(String code) {
-        log.trace("getBasketByCode {}", code);
-        return Optional.ofNullable(this.baskets.get(code));
-    }
 
-    @Override
-    public Optional<CarsOld> addItemToBasket(String code, Item item, Optional<Journeys> discount) {
-        log.trace("addItem {} ToBasket {}", code, item.getCode());
-        return Optional.ofNullable(baskets.computeIfPresent(code, (c, b) -> {
-            b.addItem(item);
-            discount.ifPresent( d -> {
-                log.info("addDiscount {} ToItem {}", d.getPercentage(), item.getCode());
-                b.addItemDiscount(item, d);
-            });
-            return b;
-        }));
-    }*/
 }

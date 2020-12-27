@@ -1,32 +1,54 @@
----
+image: connorbutch/gradle-and-java-11:alpha
+
+variables:
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+  
+before_script:
+  - export GRADLE_USER_HOME=`pwd`/.gradle  
+
+services:
+  - docker:stable-dind  
+  
 stages:
   - build
   - docker
   - acceptance
 
-remove_me:
-  stage: build
-  script:
-  - >
-     echo If you can see this you know that gitlab-ci is running.  You should
-     uncomment the sections that enable building the docker image and running
-     the acceptance tests.
-     Change any file as necessary to make tests pass in your language of
-     choice.  But be mindful that we will only accept challenges that are
-     passing acceptance.  Good luck!
-
 ## Uncomment the following sections to enable docker, image building and
 ## acceptance
 
-# build:
-#   stage: build
-#   image: # Add an image to build your service
-#   artifacts:
-#     paths:
-#       - bin/
-#   script:
-#     - echo do something to build the binary or whatever
-
+build:
+   stage: build
+   script: ./gradlew check
+   cache:
+        key: "$CI_COMMIT_REF_NAME"
+        policy: pull
+        paths:
+          - build
+          - .gradle
+build:
+   stage: build
+   script:
+    - ./gradlew clean build
+   cache:
+        key: "$CI_COMMIT_REF_NAME"
+        policy: push
+        paths:
+          - build
+          - .gradle
+    artifacts:
+        paths:
+            - car-pooling-challenge-dnevado/build/
+docker:
+  stage: docker
+  script:
+    - cd car-pooling-challenge-dnevado
+    # - docker build -f src/main/docker/Dockerfile.jvm -t quarkus/car-pooling-challenge-dnevado-jvm .
+    - docker build -f src/main/docker/Dockerfile.jvm -t registry.gitlab.com/dnevado/car-pooling-challenge-dnevado:$CI_COMMIT_SHORT_SHA  .  
+    #- docker build -f infrastructure/Dockerfile -t registry.gitlab.com/connorbutch/reading-comprehension:$CI_COMMIT_SHORT_SHA  .
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker push registry.gitlab.com/dnevado/car-pooling-challenge-dnevado:$CI_COMMIT_SHORT_SHA            
+            
 # build_image:
 #   stage: docker
 #   image: docker:latest
