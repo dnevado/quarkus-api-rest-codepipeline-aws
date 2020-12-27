@@ -4,8 +4,8 @@ variables:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
 
 before_script:
-  - export GRADLE_USER_HOME=`pwd`/.gradle    
-  - export JAVA_HOME="jre-11-openjdk-11.0.9.11-3.el8_3.x86_64"
+  - export GRADLE_USER_HOME=`pwd`/.gradle
+  - export JAVA_HOME="/usr/lib/jvm/jre-11-openjdk-11.0.9.11-3.el8_3.x86_64"
 
 services:
   - docker:stable-dind
