@@ -11,7 +11,7 @@
 #
 # Then run the container using:
 #
-# docker run -i --rm -p 8080:8080 quarkus/car-pooling-challenge-dnevado
+# docker run -i --rm -p 8080:8080 quarkus/car-pooling-challenge-dnevado-jvm
 #
 # If you want to include the debug port into your docker image
 # you will have to expose the debug port (default 5005) like this :  EXPOSE 8080 5050
@@ -44,9 +44,18 @@ RUN microdnf install curl ca-certificates ${JAVA_PACKAGE} \
 
 # Configure the JAVA_OPTIONS, you can add -XshowSettings:vm to also display the heap size.
 ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
+# Setup JAVA_HOME -- useful for docker commandline
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-11.0.9.11-3.el8_3.x86_64/
+RUN export JAVA_HOME
 
-COPY build/* /deployments/
+# FOR CI 
+COPY build/* /deployments/*
 COPY build/*-runner.jar /deployments/app.jar
+# FOR LOCAL EXECUTION 
+# COPY build/lib/* /deployments/lib/
+# COPY build/*-runner.jar /deployments/app.jar
+
+
 
 EXPOSE 8080
 USER 1001
