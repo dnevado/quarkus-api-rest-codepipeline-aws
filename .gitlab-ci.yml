@@ -36,7 +36,7 @@ docker:
     - docker build -f src/main/docker/Dockerfile.jvm -t registry.gitlab.com/dnevado/car-pooling-challenge-dnevado:$CI_COMMIT_SHORT_SHA  .
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker push registry.gitlab.com/dnevado/car-pooling-challenge-dnevado:$CI_COMMIT_SHORT_SHA
-	
+    
 ## Uncomment the acceptance step and do not remove or edit, this step is
 ## required for us to accept your submission!
 # acceptance:
