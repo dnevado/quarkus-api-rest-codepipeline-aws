@@ -45,17 +45,15 @@ RUN microdnf install curl ca-certificates ${JAVA_PACKAGE} \
 # Configure the JAVA_OPTIONS, you can add -XshowSettings:vm to also display the heap size.
 ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
 # Set the JAVA_HOME variable to make it clear where Java is located
-ENV JAVA_HOME /etc/alternatives/jre
-
-ENV JAVA_HOME /usr/bin/java
+ENV JAVA_HOME=/usr/lib/jvm/jre-11-openjdk-11.0.9.11-3.el8_3.x86_64
 RUN export JAVA_HOME
 	
 # FOR CI 
-COPY build/* /deployments/*
-COPY build/*-runner.jar /deployments/app.jar
-# FOR LOCAL EXECUTION 
-# COPY build/lib/* /deployments/lib/
+# COPY build/* /deployments/*
 # COPY build/*-runner.jar /deployments/app.jar
+# FOR LOCAL EXECUTION 
+COPY build/lib/* /deployments/lib/
+COPY build/*-runner.jar /deployments/app.jar
 
 
 
