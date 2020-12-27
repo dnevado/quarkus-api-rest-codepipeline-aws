@@ -17,13 +17,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
- * This class returns <p>CompletionStage<Basket></p> instead of Optional due to
+ * This class returns <p>CompletionStage<ReturnMessage></p> instead of Optional due to
  * <p>io.quarkus.vertx.ConsumeEvent</p> and Message does not know
  * anything about Optional. For that <br>null</br> is used as empty
  *
- * For that methods return <p>CompletionStage<Basket></p> instead of Optional.
+ * For that methods return <p>CompletionStage<ReturnMessage></p> instead of Optional.
  *
- * @author javigs82
+ * @author dnevado
  */
 @ApplicationScoped
 public class CabifyService {
@@ -36,16 +36,7 @@ public class CabifyService {
 
     @ConsumeEvent(value = "create-available-cars")
     public CompletionStage<ReturnMessage> createAvailableCars(String event) {
-        log.debug("createAvailableCars");
-        JsonArray cars = new JsonArray();        
-        JsonObject car1 = new JsonObject();
-        car1.put("id", "5");
-        car1.put("seats", 93);
-        cars.add(car1);
-        JsonObject car2 = new JsonObject();
-        car2.put("id", "6");
-        car2.put("seats", 69);
-        cars.add(car2);
+        log.debug("createAvailableCars");        
         return CompletableFuture.supplyAsync(() ->
                 this.cabifyRepository.createAvailableCars(event).get()
         );
@@ -61,10 +52,7 @@ public class CabifyService {
     
     @ConsumeEvent(value = "create-journey")
     public CompletionStage<ReturnMessage> assignJourney(String event) {
-        log.debug("createAvailableCars");
-        JsonObject journey = new JsonObject();
-        journey.put("id", "5");
-        journey.put("people", 93);         
+        log.debug("assignJourney");                
         return CompletableFuture.supplyAsync(() ->
                 this.cabifyRepository.assignJourney(event).get()
         );

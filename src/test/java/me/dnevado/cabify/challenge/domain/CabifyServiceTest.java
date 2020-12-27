@@ -1,7 +1,6 @@
 package me.dnevado.cabify.challenge.domain;
 
 import io.quarkus.test.junit.QuarkusTest;
-import me.dnevado.cabify.challenge.domain.AddItemToBasketEvent;
 import me.dnevado.cabify.challenge.domain.CabifyService;
 import me.dnevado.cabify.challenge.domain.model.ReturnMessage;
 

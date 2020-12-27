@@ -5,7 +5,7 @@ import io.quarkus.vertx.web.RouteBase;
 import io.quarkus.vertx.web.RoutingExchange;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.mutiny.core.eventbus.EventBus;
-import me.dnevado.cabify.challenge.domain.AddItemToBasketEvent;
+
 import me.dnevado.cabify.challenge.domain.CabifyService;
 import me.dnevado.cabify.challenge.domain.model.Car;
 import me.dnevado.cabify.challenge.domain.model.ReturnMessage;
@@ -22,7 +22,7 @@ import javax.json.bind.JsonbBuilder;
  *
  * LogLevel info due to monitoring.
  *
- * @author javigs82
+ * @author dnevado
  */
 
 @ApplicationScoped
@@ -47,8 +47,9 @@ public class CabifyApplication {
     
     @Route(path = "/journey", methods = HttpMethod.POST)
     void journey(RoutingExchange ex) {
-        log.info("POST /journey/");       
-        bus.<ReturnMessage>request(_JOURNEY_MESSAGGE, "")
+        log.info("POST /journey/");   
+        String groupContent = ex.context().getBodyAsString();
+        bus.<ReturnMessage>request(_JOURNEY_MESSAGGE,groupContent)
         .subscribeAsCompletionStage()
         .thenAccept(s -> ex.ok(JsonbBuilder.create().toJson(s.body())));
     }
@@ -56,16 +57,17 @@ public class CabifyApplication {
     @Route(path = "/dropoff", methods = HttpMethod.POST)
     void dropoff(RoutingExchange ex) {
         log.info("POST /dropoff/"); 
-        bus.<ReturnMessage>request(_DROPOFF_MESSAGGE, "")
+        String groupId = ex.getParam("ID").get();
+        bus.<ReturnMessage>request(_DROPOFF_MESSAGGE, groupId)
         .subscribeAsCompletionStage()
         .thenAccept(s -> ex.ok(JsonbBuilder.create().toJson(s.body())));
     }
     
-    @Route(path = "/locate:id", methods = HttpMethod.POST)
+    @Route(path = "/locate", methods = HttpMethod.POST)
     void locate(RoutingExchange ex) {
         log.info("post /locate/");
-        String id = ex.getParam("id").get();
-        bus.<ReturnMessage>request(_LOCATE_MESSAGGE, id)
+        String groupId = ex.getParam("ID").get();
+        bus.<ReturnMessage>request(_LOCATE_MESSAGGE, groupId)
         .subscribeAsCompletionStage()
         .thenAccept(s -> {
             if (s.body() != null) {
@@ -86,8 +88,9 @@ public class CabifyApplication {
     
     @Route(path = "/cars", methods = HttpMethod.PUT)
     void createAvailableCars(RoutingExchange ex) {
-        log.info("PUT /cars/");
-        bus.<ReturnMessage>request(_CARS_MESSAGGE, "")
+        log.debug("PUT /cars/");
+        String carsContent = ex.context().getBodyAsString();
+        bus.<ReturnMessage>request(_CARS_MESSAGGE, carsContent)
         .subscribeAsCompletionStage()
         .thenAccept(s -> ex.ok(JsonbBuilder.create().toJson(s.body())));
     }

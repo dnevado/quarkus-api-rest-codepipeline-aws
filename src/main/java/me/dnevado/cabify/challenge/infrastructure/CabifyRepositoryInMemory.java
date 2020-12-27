@@ -61,25 +61,40 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
     public Optional<ReturnMessage> createAvailableCars(String availablecars) {
     	/* blocking process */
     	serviceReady = Boolean.FALSE;
-        log.trace("createAvailableCars {}", availablecars); 
+        log.info("createAvailableCars {}", availablecars); 
         ReturnMessage message = new ReturnMessage("200","OK");
         // avoiding overritten of original variable in case of error 
         Map<Long, Car> temporaryAvailableCars = Collections.synchronizedMap(new LinkedHashMap<Long, Car>());
         /* Previous validation of all car entries before processing  */ 
+        boolean syntaxError = Boolean.FALSE;
         try 
         {
-            JsonArray jAvailablecars  = new JsonArray(availablecars);        
+            JsonArray jAvailablecars  = new JsonArray(availablecars);
             for (int i = 0; i < jAvailablecars.size(); i++) {
             	JsonObject jsonCar = jAvailablecars.getJsonObject(i);        	
-            	Car  car = new Gson().fromJson(jsonCar.toString(), Car.class);        	        
-            	temporaryAvailableCars.put(car.getCarId(),car);        	
+            	Car  car = new Gson().fromJson(jsonCar.toString(), Car.class);
+            	syntaxError = !(car.getCarId()!=0 &&  car.getReservedSeats() ==0 && car.getAvailableSeats()>0);
+            	if (!syntaxError)
+            		temporaryAvailableCars.put(car.getCarId(),car);
+            	else
+            	{
+            		temporaryAvailableCars.clear();
+            		message.setStatusCode("400");
+            		message.setStatusDescription("Bad Request");
+            		log.debug("Error formatting createAvailableCars {}", car); 
+            		break;
+            	}
+            		
             }
             // everything OK?
-            availableCars.clear();
-            peopleGroups.clear();        
-            journeyCars.clear();
-            availableCars.putAll(temporaryAvailableCars);
-            temporaryAvailableCars.clear();
+            if (!syntaxError)
+            {
+	            availableCars.clear();
+	            peopleGroups.clear();        
+	            journeyCars.clear();
+	            availableCars.putAll(temporaryAvailableCars);
+	            temporaryAvailableCars.clear();
+            }
             serviceReady =  Boolean.TRUE;
         }
         catch (Exception e)
@@ -96,7 +111,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
     @Override
     public Optional<ReturnMessage> serviceStatus() {
         log.trace("serviceStatus");        
-        boolean serviceOK = !serviceReady; // up and running 
+        boolean serviceOK = serviceReady; // up and running 
         ReturnMessage message;
         if (serviceOK)
         	message =  new ReturnMessage("200","OK");
@@ -124,7 +139,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
      */
     @Override
     public Optional<ReturnMessage> dropOff(String groupId) {    	
-    	log.trace("assignJourney {}", groupId);
+    	log.trace("dropOff {}", groupId);
         ReturnMessage message = new ReturnMessage("404", "Not Found");
         Long parsedGroupId;
         try 
@@ -137,7 +152,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
             }    	    
     	    else
     	    {
-    	    	parsedGroupId = Long.getLong(groupId);
+    	    	parsedGroupId = Long.parseLong(groupId);
     	    	if (this.journeyCars.containsKey(parsedGroupId))
     	        {
     	        	JourneyCar journey = this.journeyCars.get(parsedGroupId);
@@ -149,8 +164,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
     	    		message.setStatusDescription("OK");    		
     	    		// add  new available cars seats
     	    		int finalReservedSeats = foundCar.getReservedSeats() - groupSize.intValue();
-    	    		foundCar.setReservedSeats(finalReservedSeats); 
-    	    		availableCars.put(foundCar.getCarId(), foundCar);        	
+    	    		foundCar.setReservedSeats(finalReservedSeats);     	    		       
     	        }
     	    }
         }
@@ -181,41 +195,45 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
     */
 	@Override
 	public Optional<ReturnMessage> assignJourney(String journey) {
-		// TODO Auto-generated method stub
-        log.trace("assignJourney {}", journey);
+		// TODO Auto-generated method stub        
+        log.info("assignJourney {}", journey); 
         ReturnMessage message = new ReturnMessage("200", "OK");
-        Long parsedJourneyId;       
         try 
-        {        	
-	        if (!isNumeric(journey))
-	        {
-	           	message.setStatusCode("400");
-	      		message.setStatusDescription("Bad Request");
-	  		
-	        }    	    
-		    else
-		    {
-		    	parsedJourneyId = Long.getLong(journey);        
-		        Group  group = new Gson().fromJson(parsedJourneyId.toString(), Group.class);              
+        {        		      	    	       
+	        Group  group = new Gson().fromJson(journey, Group.class);
+	        boolean syntaxError = !(group.getId()!=0 &&  group.getPeople()>0);
+        	if (syntaxError)
+        	{
+        		message.setStatusCode("400");
+        		message.setStatusDescription("Bad Request");
+        	}
+        	else
+        	{	  		
 		        // order preserved                 
 		        long foundCarId = -1;
 		        for (Long carKey : availableCars.keySet()) {        	
 		        	foundCarId =  isReachable(availableCars.get(carKey),group.getPeople());   
 		        	if (foundCarId!=-1)
-		        	{
-		        		message.setStatusCode("200");
-		        		message.setStatusDescription("OK");
+		        	{		        		
 		        		Car foundCar = availableCars.get(carKey);
 		        		// reduce available cars seats
 		        		int finalReservedSeats = foundCar.getReservedSeats() + group.getPeople();
 		        		foundCar.setReservedSeats(finalReservedSeats);
 		        		// add journey to people
 		        		JourneyCar journeyCar = new JourneyCar(foundCarId, group.getId());
+		        		journeyCar.setAssigned(Short.valueOf(String.valueOf(finalReservedSeats)));
 		        		journeyCars.put(group.getId(), journeyCar);
+		        		// add group to list 
+		        		peopleGroups.put(group.getId(), Long.valueOf(group.getPeople()));
 		        		break;
 		        	}
 		        }
-		    }
+		        if (foundCarId==-1)
+		        {
+		        	message.setStatusCode("400");
+	        		message.setStatusDescription("Bad Request");
+		        }
+        	}
 		}
 		catch (Exception e)
         {
@@ -246,7 +264,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
         {
     	    if (isNumeric(groupId))
     	    {
-    	    	 parsedGroupId = Long.getLong(groupId);
+    	    	 parsedGroupId = Long.parseLong(groupId);
     	    	 if (!this.peopleGroups.containsKey(parsedGroupId))
 		         {	
     	    		 	message.setStatusCode("404");

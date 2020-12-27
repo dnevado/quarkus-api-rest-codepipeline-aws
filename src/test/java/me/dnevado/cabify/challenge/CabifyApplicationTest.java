@@ -1,27 +1,107 @@
 package me.dnevado.cabify.challenge;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.vertx.core.json.JsonObject;
 import me.dnevado.cabify.challenge.domain.model.Car;
+import io.restassured.http.ContentType;
 import me.dnevado.cabify.challenge.domain.model.ReturnMessage;
 
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-
-import javax.json.bind.JsonbBuilder;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
 
 
 @QuarkusTest
+@TestMethodOrder(OrderAnnotation.class)
+
 public class CabifyApplicationTest {
 
+    
     @Test
-    public void testCreateCarsEndpoint() {
+    public void test200OKEndpoint() {
         given()
                 .when().put("/cars")
                 .then()
                 .statusCode(200);
     }
-
+    @Test
+    @Order(1)
+    public void testCreateCarsEndpoint() {    	
+        	      	
+    	String carsPayLoad = "[{\n" +
+    		        "  \"id\": 1,\n" +    		      
+    		        "  \"seats\": 4\n" +
+    		        "}]";
+    	
+    	
+        given()
+        		.accept(ContentType.JSON)
+        		.contentType(ContentType.JSON).body(carsPayLoad)        		
+                .when().put("/cars")
+                .then()
+                .statusCode(200).body(containsString("OK"));
+    }
+    @Test
+    public void testFailCreateCarsEndpoint() {    	
+    
+    	String carsPayLoad = "[{\n" +
+		        "  \"id\": 1,\n" +    		      
+		        "  \"seat\": 4\n" +
+		        "}]";
+	
+	
+    	given()
+    		.accept(ContentType.JSON)
+    		.contentType(ContentType.JSON).body(carsPayLoad)        		
+            .when().put("/cars")
+            .then()
+            .statusCode(200).body(containsString("Bad Request"));
+    
+    }
+    
+    @Test    
+    @Order(2)
+    public void testCreateJourneyEndpoint() {    	
+    	
+    	String peoplePayLoad = "{\n" +
+		        "  \"id\": 1,\n" +    		      
+		        "  \"people\": 4\n" +
+		        "}";
+	
+	
+    	given()
+    		.accept(ContentType.JSON)
+    		.contentType(ContentType.JSON).body(peoplePayLoad)        		
+            .when().post("/journey")
+            .then()
+            .statusCode(200).body(containsString("OK"));
+    	
+    	
+    	
+    }
+    @Test
+    public void testFailCreateJourneyEndpoint() {    	
+    
+    	String peoplePayLoad = "{\n" +
+		        "  \"id\": 1,\n" +    		      
+		        "  \"peopl\": 4\n" +
+		        "}";
+	
+	
+    	given()
+    		.accept(ContentType.JSON)
+    		.contentType(ContentType.JSON).body(peoplePayLoad)        		
+            .when().post("/journey")
+            .then()
+            .statusCode(200).body(containsString("Bad Request"));
+    }
+    
     @Test
     public void testServiceStatus() {
     	
@@ -34,100 +114,64 @@ public class CabifyApplicationTest {
     }
     
     @Test
-    public void testDropOff() {
+    public void test404OKDropOff() {
     	
         given()
+        		.param("ID", 99999999)
                 .when().post("/dropoff")
                 .then()
-                .statusCode(200);
+                	.statusCode(200).body(containsString("Not Found"));                	
         
 
     }
- 
- 
- /*
-    @Test //only test if does not exist
-    public void testDeleteBasketNotFoundEndpoint() {
-        String delete404 = "not_exist_basket";
-        given()
-                .when().delete("/basket/" + delete404)
-                .then()
-                .statusCode(404);
-    }
-
     @Test
-    public void testGetBasketByCodeEndpoint() {
-        //create one
-        CarsOld basket = createBasket();
-        //getById
+    public void testBadRequestDropOff() {
+    	
         given()
-                .when().get("/basket/" + basket.getCode())
+        		.param("ID", -1)
+                .when().post("/dropoff")
                 .then()
-                .statusCode(200);
-    }
+                	.statusCode(200).body(containsString("Bad Request"));                	
+        
 
+    }
+    
     @Test
-    public void testGetBasketByCodeNotFoundEndpoint() {
-        //create one
-        String code = "not_exist_basket";
-        //getById
+    @Order(4)
+    public void test200OKDropOff() {
+    	
+    	    
         given()
-                .when().get("/basket/" + code)
+        		.param("ID", "1")
+                .when().post("/dropoff")
                 .then()
-                .statusCode(404);
-    }
-
+                .statusCode(200);        		
+       
+    } 
+    
     @Test
-    public void testAddItemToBasketEndpoint() {
-        //create one
-        CarsOld basket = createBasket();
-        //getById
+    public void test404OKLocate() {
+    	
         given()
-                .when().put("/basket/" + basket.getCode() + "/item/PEN")
-                .then()
-                .statusCode(200);
-    }
+        		.param("ID", "-1")
+                .when().post("/locate")
+                .then()                	
+                	.statusCode(200).body(containsString("Bad Request"));
+        
 
+    }
+    
     @Test
-    public void testAddItemToBasketNotFoundEndpoint() {
-        //getById
-        given()
-                .when().put("/basket/not-found-basket/item/PEN")
-                .then()
-                .statusCode(404);
-    }
-
-    @Test
-    public void testAddItemNotExistToBasketEndpoint() {
-        //create one
-        CarsOld basket = createBasket();
-        String item404 = "not_exist_item";
-        //getById
-        given()
-                .when().put("/basket/" + basket.getCode() + "/item/" + item404)
-                .then()
-                .statusCode(404);
-    }
-
-    @Test
-    public void testAddItemNotExistToBasketNotFoundEndpoint() {
-        //create one
-        CarsOld basket = createBasket();
-        String item404 = "not_exist_item";
-        //getById
-        given()
-                .when().put("/basket/" + item404 + "/item/" + item404)
-                .then()
-                .statusCode(404);
-    }
-*/
-
-    private ReturnMessage createCars() {
-        return JsonbBuilder.create().fromJson(
-                given()
-                        .when().post("/cars")
-                        .then()
-                        .extract().response().asString(), ReturnMessage.class);
-    }
-
+    @Order(3)
+    public void test200OKLocate() {
+    	
+    	  given()
+    	  	  .param("ID", "1")
+	          .when().post("/locate")
+	          .then()	          	
+	          	.statusCode(200).body(containsString("1"));	          		
+       
+    } 
+    
+    
 }
