@@ -12,8 +12,7 @@ services:
   - docker:stable-dind
 
 stages:
-  # - build
-  - docker
+  - build_and_docker_multistage  
   - acceptance
 
 
@@ -32,23 +31,22 @@ stages:
 #      - car-pooling-challenge-dnevado/build/
 
 docker:
-  stage: docker
+  stage: build_and_docker_multistage
   script:
-    # - cd car-pooling-challenge-dnevado
-    - docker build -f Dockerfile -t registry.gitlab.com/cabify-challenge/car-pooling-challenge-dnevado:$CI_COMMIT_SHORT_SHA  .
+    - docker build -f Dockerfile -t ${CI_REGISTRY_IMAGE}:$CI_COMMIT_SHORT_SHA  .
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker push registry.gitlab.com/cabify-challenge/car-pooling-challenge-dnevado:$CI_COMMIT_SHORT_SHA
+    - docker push ${CI_REGISTRY_IMAGE}:$CI_COMMIT_SHORT_SHA
     
 ## Uncomment the acceptance step and do not remove or edit, this step is
 ## required for us to accept your submission!
-# acceptance:
-#   image: cabify/challenge:latest
-#   stage: acceptance
-#   only: 
-#     - master
-#   dependencies: []
-#   services:
-#     - name: ${CI_REGISTRY_IMAGE}:latest
-#       alias: pooling
-#   script:
-#     - /harness --address http://pooling:9091 acceptance
+acceptance:
+   image: cabify/challenge:latest
+   stage: acceptance
+   only: 
+     - master
+   dependencies: []
+   services:
+     - name: ${CI_REGISTRY_IMAGE}:latest
+       alias: pooling
+   script:
+     - /harness --address http://pooling:9091 acceptance

@@ -31,7 +31,7 @@ RUN microdnf install curl ca-certificates ${JAVA_PACKAGE} \
     && echo "securerandom.source=file:/dev/urandom" >> /etc/alternatives/jre/lib/security/java.security  
 
 # Configure the JAVA_OPTIONS, you can add -XshowSettings:vm to also display the heap size.
-ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"     
+ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager -Dquarkus.http.port=9091"     
 
 RUN ls -ltr  /deployments
 
@@ -39,7 +39,7 @@ COPY --from=build  /tmp/car-pooling-challenge-dnevado/build/lib/* /deployments/l
 COPY --from=build  /tmp/car-pooling-challenge-dnevado/build/*-runner.jar /deployments/app.jar
 RUN ls -ltr /deployments/
 	
-EXPOSE 8080
+EXPOSE 9091
 USER 1001
 
 ENTRYPOINT [ "/deployments/run-java.sh" ]
