@@ -1,3 +1,5 @@
+# BUILD STAGE 
+
 FROM gradle:jdk11 AS build
 ARG CHALLENGE_NAME=car-pooling-challenge-dnevado
 COPY --chown=gradle:gradle . /home/gradle/${CHALLENGE_NAME}
@@ -7,6 +9,8 @@ RUN cp -r  /home/gradle/${CHALLENGE_NAME} /tmp
 WORKDIR /tmp/${CHALLENGE_NAME}/build
 USER gradle 
 
+
+# DOCKER STAGE 
 
 FROM registry.access.redhat.com/ubi8/ubi-minimal:8.3
 
