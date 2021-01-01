@@ -8,7 +8,7 @@ before_script:
   #- export JAVA_HOME=/opt/java/openjdk
 
 services:
-  #- docker:stable-dind
+  - docker:stable-dind
 
 stages:
   # - build
