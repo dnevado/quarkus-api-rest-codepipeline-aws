@@ -1,0 +1,26 @@
+FROM gradle:4.7.0-jdk11-alpine AS build
+COPY --chown=gradle:gradle . /home/gradle/src
+WORKDIR /home/gradle/src
+RUN gradle build --no-daemon 
+
+FROM openjdk:11-jre-slim
+
+EXPOSE 9091
+
+RUN mkdir /app
+
+COPY --from=build /home/gradle/src/build/libs/*.jar /app/spring-boot-application.jar
+
+
+FROM alpine:3.8
+
+# This Dockerfile is optimized for go binaries, change it as much as necessary
+# for your language of choice.
+
+RUN apk --no-cache add ca-certificates=20190108-r0 libc6-compat=1.1.19-r10
+
+EXPOSE 9091
+
+COPY car-pooling-challenge /
+ 
+ENTRYPOINT [ "/car-pooling-challenge" ]

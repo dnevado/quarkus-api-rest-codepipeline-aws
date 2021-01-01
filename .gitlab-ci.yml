@@ -4,37 +4,37 @@ variables:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
 
 before_script:
-  - export GRADLE_USER_HOME=`pwd`/.gradle
-  - export JAVA_HOME=/opt/java/openjdk
+  # - export GRADLE_USER_HOME=`pwd`/.gradle
+  #- export JAVA_HOME=/opt/java/openjdk
 
 services:
-  - docker:stable-dind
+  #- docker:stable-dind
 
 stages:
-  - build
+  # - build
   - docker
   - acceptance
 
 
-build:
-  stage: build
-  script:    
-    - ./gradlew clean build 
-  cache:
-    key: "$CI_COMMIT_REF_NAME"
-    policy: push
-    paths:
-      - build
-      - .gradle
-  artifacts:
-    paths:
-      - car-pooling-challenge-dnevado/build/
+#build:
+#  stage: build
+#  script:    
+#    - ./gradlew clean build 
+#  cache:
+#    key: "$CI_COMMIT_REF_NAME"
+#    policy: push
+#    paths:
+#      - build
+#      - .gradle
+#  artifacts:
+#    paths:
+#      - car-pooling-challenge-dnevado/build/
 
 docker:
   stage: docker
   script:
     - cd car-pooling-challenge-dnevado
-    - docker build -f src/main/docker/Dockerfile.jvm -t registry.gitlab.com/cabify-challenge/car-pooling-challenge-dnevado:$CI_COMMIT_SHORT_SHA  .
+    - docker build -f Dockerfile.jvm -t registry.gitlab.com/cabify-challenge/car-pooling-challenge-dnevado:$CI_COMMIT_SHORT_SHA  .
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker push registry.gitlab.com/cabify-challenge/car-pooling-challenge-dnevado:$CI_COMMIT_SHORT_SHA
     
