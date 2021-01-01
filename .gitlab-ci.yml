@@ -33,7 +33,7 @@ stages:
 docker:
   stage: build_and_docker_multistage
   script:
-    - docker build -f Dockerfile -t ${CI_REGISTRY_IMAGE}:$CI_COMMIT_SHORT_SHA  .
+    - docker build -f Dockerfile -t ${CI_REGISTRY_IMAGE}:latest  .
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker push ${CI_REGISTRY_IMAGE}:$CI_COMMIT_SHORT_SHA
     
