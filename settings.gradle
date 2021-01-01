@@ -8,4 +8,4 @@ pluginManagement {
         id 'io.quarkus' version "${quarkusPluginVersion}"
     }
 }
-rootProject.name = 'ecommerce-basket'
+rootProject.name = 'car-pooling-challenge-dnevado'

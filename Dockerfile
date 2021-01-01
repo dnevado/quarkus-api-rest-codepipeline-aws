@@ -1,10 +1,10 @@
 FROM gradle:jdk11 AS build
-COPY --chown=gradle:gradle . /home/gradle/car-pooling-challenge-dnevado
-WORKDIR /home/gradle/car-pooling-challenge-dnevado
+ARG CHALLENGE_NAME=car-pooling-challenge-dnevado
+COPY --chown=gradle:gradle . /home/gradle/${CHALLENGE_NAME}
+WORKDIR /home/gradle/${CHALLENGE_NAME}
 RUN gradle build --no-daemon
-RUN cp -r  /home/gradle/car-pooling-challenge-dnevado /tmp
-WORKDIR /tmp/car-pooling-challenge-dnevado/build
-RUN ls -ltr /tmp/car-pooling-challenge-dnevado/build
+RUN cp -r  /home/gradle/${CHALLENGE_NAME} /tmp
+WORKDIR /tmp/${CHALLENGE_NAME}/build
 USER gradle 
 
 
