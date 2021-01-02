@@ -15,6 +15,7 @@ import me.dnevado.cabify.challenge.domain.model.ReturnMessage;
 
 import javax.enterprise.context.ApplicationScoped;
 
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -24,6 +25,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.Map;
 import java.util.stream.Stream;
+
+
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.SdkClientException;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+
 
 @ApplicationScoped
 public class CabifyRepositoryInMemory implements CabifyRepository {
@@ -56,10 +67,42 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
     //private final Map<String, Long> journeyCars = new ConcurrentHashMap<>();
     
         
-    
+    private  void sendLogTrace(String data, String method)
+    {
+    	Regions clientRegion = Regions.EU_CENTRAL_1;
+        String bucketName = "cabify-challenge-dnevado";
+        String stringObjKeyName = method + "_cabify_" + Calendar.getInstance().get(Calendar.MILLISECOND) ;
+        String fileObjKeyName = method + "_cabify_" + Calendar.getInstance().get(Calendar.MILLISECOND) ;
+        String fileName = "cabify.txt";
+        
+        log.info("sendLogTrace", data); 
+        
+        try {
+            //This code expects that you have AWS credentials set up per:
+            // https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html
+            AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
+                    .withRegion(clientRegion)
+                    .build();
+
+            // Upload a text string as a new object.
+            s3Client.putObject(bucketName, stringObjKeyName, data);
+
+        } catch (AmazonServiceException e) {
+            // The call was transmitted successfully, but Amazon S3 couldn't process 
+            // it, so it returned an error response.
+            e.printStackTrace();
+        } catch (SdkClientException e) {
+            // Amazon S3 couldn't be contacted for a response, or the client
+            // couldn't parse the response from Amazon S3.
+            e.printStackTrace();
+        }
+        
+        
+    }
     @Override
     public Optional<ReturnMessage> createAvailableCars(String availablecars) {
     	/* blocking process */
+    	sendLogTrace(availablecars,"createAvailableCars");
     	serviceReady = Boolean.FALSE;
         log.info("createAvailableCars {}", availablecars); 
         ReturnMessage message = new ReturnMessage("200","OK");
@@ -110,14 +153,17 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
     		message.setStatusDescription("Bad Request");
     		serviceReady =  Boolean.TRUE;
         }   
-       
+
+
         return Optional.of(message);
     }
 
     
     @Override
     public Optional<ReturnMessage> serviceStatus() {
-        log.trace("serviceStatus");        
+        log.trace("serviceStatus");  
+    	sendLogTrace("","serviceStatus");
+
         boolean serviceOK = serviceReady; // up and running 
         ReturnMessage message;
         if (serviceOK)
@@ -147,6 +193,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
     @Override
     public Optional<ReturnMessage> dropOff(String groupId) {    	
     	log.trace("dropOff {}", groupId);
+    	sendLogTrace(groupId,"dropOff");
         ReturnMessage message = new ReturnMessage("404", "Not Found");
         Long parsedGroupId;
         try 
@@ -203,7 +250,8 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
 	@Override
 	public Optional<ReturnMessage> assignJourney(String journey) {
 		// TODO Auto-generated method stub        
-        log.info("assignJourney {}", journey); 
+        log.info("assignJourney {}", journey);
+    	sendLogTrace(journey,"assignJourney");
         ReturnMessage message = new ReturnMessage("200", "OK");
         try 
         {        		      	    	       
@@ -266,6 +314,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
 	public Optional<ReturnMessage> locateJourney(String groupId) {
 		// TODO Auto-generated method stub
         log.trace("locateJourney {}", groupId);
+    	sendLogTrace(groupId,"locateJourney");
         ReturnMessage message = new ReturnMessage("400", "Bad Request");
         Long parsedGroupId;
         try 

@@ -13,7 +13,9 @@ dependencies {
     implementation 'io.quarkus:quarkus-kubernetes'
     implementation 'io.quarkus:quarkus-kubernetes-config'
     implementation 'io.quarkus:quarkus-jsonb'
-    implementation 'com.google.code.gson:gson:2.8.6'    
+    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.930')
+    implementation 'com.amazonaws:aws-java-sdk-s3'
     implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
     implementation 'io.quarkus:quarkus-vertx-web'
     testImplementation 'io.quarkus:quarkus-junit5'
@@ -25,6 +27,7 @@ group 'me.dnevado'
 version '1.0.0'
 
 compileJava {
+
     options.encoding = 'UTF-8'
     options.compilerArgs << '-parameters'
 }
@@ -34,6 +37,7 @@ compileTestJava {
 }
 
 java {
+	
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
 }

@@ -51,7 +51,8 @@ public class CabifyApplication {
         String groupContent = ex.context().getBodyAsString();
         bus.<ReturnMessage>request(_JOURNEY_MESSAGGE,groupContent)
         .subscribeAsCompletionStage()
-        .thenAccept(s -> ex.ok(JsonbBuilder.create().toJson(s.body())));
+        .thenAccept(s -> ex.ok(JsonbBuilder.create().toJson(s.body())));        
+        
     }
     
     @Route(path = "/dropoff", methods = HttpMethod.POST)
@@ -93,6 +94,8 @@ public class CabifyApplication {
         bus.<ReturnMessage>request(_CARS_MESSAGGE, carsContent)
         .subscribeAsCompletionStage()
         .thenAccept(s -> ex.ok(JsonbBuilder.create().toJson(s.body())));
+        log.info("END POST /journey/");        
+        ex.response().setStatusCode(500);
     }
 /* 
     //If basket is not present then throw 404.
