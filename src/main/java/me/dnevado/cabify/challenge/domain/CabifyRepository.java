@@ -24,15 +24,6 @@ public interface CabifyRepository {
     Optional<ReturnMessage> serviceStatus();
     Optional<ReturnMessage> dropOff(String eventGroupId);
     Optional<ReturnMessage> test(String test);
-    //CompletionStage<Response> test();    
-    
-    
-    /* 
-     * Optional<ReturnMessage> createAvailableCars(JsonArray AvailableCars);
-    Optional<ReturnMessage> assignJourney(JsonObject journey);
-    Optional<ReturnMessage> locateJourney(Long groupId);
-    Optional<ReturnMessage> serviceStatus();
-    Optional<ReturnMessage> dropOff(Long groupId);
-     */
+  
 
 }

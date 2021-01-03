@@ -108,7 +108,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
     @Override
     public Optional<ReturnMessage> createAvailableCars(String availablecars) {
     	/* blocking process */
-    	sendLogTrace(availablecars,"createAvailableCars");
+    	//sendLogTrace(availablecars,"createAvailableCars");
     	serviceReady = Boolean.FALSE;
         log.info("createAvailableCars {}", availablecars); 
         ReturnMessage message = new ReturnMessage("200","OK");
@@ -168,7 +168,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
     @Override
     public Optional<ReturnMessage> serviceStatus() {
         log.trace("serviceStatus");  
-    	sendLogTrace("","serviceStatus");
+    	//sendLogTrace("","serviceStatus");
 
         boolean serviceOK = serviceReady; // up and running 
         ReturnMessage message;
@@ -200,7 +200,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
     @Override
     public Optional<ReturnMessage> dropOff(String groupId) {    	
     	log.trace("dropOff {}", groupId);
-    	sendLogTrace(groupId,"dropOff");
+    	//sendLogTrace(groupId,"dropOff");
         ReturnMessage message = new ReturnMessage("404", "Not Found");
         Long parsedGroupId;
         try 
@@ -258,7 +258,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
 	public Optional<ReturnMessage> assignJourney(String journey) {
 		// TODO Auto-generated method stub        
         log.info("assignJourney {}", journey);
-    	sendLogTrace(journey,"assignJourney");
+    	//sendLogTrace(journey,"assignJourney");
         ReturnMessage message = new ReturnMessage("200", "OK");
         try 
         {        		      	    	       
@@ -321,7 +321,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
 	public Optional<ReturnMessage> locateJourney(String groupId) {
 		// TODO Auto-generated method stub
         log.trace("locateJourney {}", groupId);
-    	sendLogTrace(groupId,"locateJourney");
+    	//sendLogTrace(groupId,"locateJourney");
         ReturnMessage message = new ReturnMessage("400", "Bad Request");
         Long parsedGroupId;
         try 

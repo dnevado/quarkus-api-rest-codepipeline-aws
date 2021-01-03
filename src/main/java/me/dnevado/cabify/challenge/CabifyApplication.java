@@ -50,9 +50,7 @@ public class CabifyApplication {
     public Response cars(String cars) {
     	log.info(cars);
     	Optional<ReturnMessage> message = service.createAvailableCars(cars);
-    	//StatusType statusCode = StatusType.
     	return responseBuilder(message);
-        //return Response.ok(service.createAvailableCars(cars)).build();
     }
     
     @GET
@@ -66,10 +64,8 @@ public class CabifyApplication {
    
     @GET
     @Path("/test")
-    public Response test(){
-    	//return Response.serverError().build();
+    public Response test(){    
     	return Response.status(404).entity("Task not provided").build();
-        //return Response.ok(service.test("")).build();
     }
     
     @POST
