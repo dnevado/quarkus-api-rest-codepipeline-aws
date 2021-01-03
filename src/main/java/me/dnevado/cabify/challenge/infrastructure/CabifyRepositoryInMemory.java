@@ -201,7 +201,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
     public Optional<ReturnMessage> dropOff(String groupId) {    	
     	log.trace("dropOff {}", groupId);
     	//sendLogTrace(groupId,"dropOff");
-        ReturnMessage message = new ReturnMessage("404", "Not Found");
+        ReturnMessage message = new ReturnMessage("404", "Not Found:" +groupId);
         Long parsedGroupId;
         try 
         {
@@ -259,7 +259,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
 		// TODO Auto-generated method stub        
         log.info("assignJourney {}", journey);
     	sendLogTrace(journey,"assignJourney");
-        ReturnMessage message = new ReturnMessage("200", "OK");
+        ReturnMessage message = new ReturnMessage("200", "OK:" + journey);
         try 
         {        		      	    	       
 	        Group  group = new Gson().fromJson(journey, Group.class);	        
@@ -322,7 +322,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
 		// TODO Auto-generated method stub
         log.trace("locateJourney {}", groupId);
     	//sendLogTrace(groupId,"locateJourney");
-        ReturnMessage message = new ReturnMessage("400", "Bad Request");
+        ReturnMessage message = new ReturnMessage("400", "Bad Request:" + groupId);
         Long parsedGroupId;
         try 
         {
