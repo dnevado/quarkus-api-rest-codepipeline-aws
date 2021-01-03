@@ -35,6 +35,13 @@ public class CabifyApplication {
     	
     }
     
+    
+    @Path("/journey")
+    @GET    
+    public Response journey() {
+    	return this.journey("");
+    }
+    
     @Path("/journey")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
