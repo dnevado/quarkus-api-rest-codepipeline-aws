@@ -258,7 +258,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
 	public Optional<ReturnMessage> assignJourney(String journey) {
 		// TODO Auto-generated method stub        
         log.info("assignJourney {}", journey);
-    	//sendLogTrace(journey,"assignJourney");
+    	sendLogTrace(journey,"assignJourney");
         ReturnMessage message = new ReturnMessage("200", "OK");
         try 
         {        		      	    	       

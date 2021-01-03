@@ -36,12 +36,8 @@ RUN microdnf install curl ca-certificates ${JAVA_PACKAGE} \
 
 # Configure the JAVA_OPTIONS, you can add -XshowSettings:vm to also display the heap size.
 ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager -Dquarkus.http.port=9091"     
-
-RUN ls -ltr  /deployments
-
 COPY --from=build  /tmp/car-pooling-challenge-dnevado/build/lib/* /deployments/lib/
 COPY --from=build  /tmp/car-pooling-challenge-dnevado/build/*-runner.jar /deployments/app.jar
-RUN ls -ltr /deployments/
 	
 EXPOSE 9091
 USER 1001

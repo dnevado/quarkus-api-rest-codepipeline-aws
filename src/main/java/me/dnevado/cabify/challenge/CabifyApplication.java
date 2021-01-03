@@ -46,6 +46,8 @@ public class CabifyApplication {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response journey(String journey) {
+    	if (journey==null)
+    	    throw new javax.ws.rs.BadRequestException();
     	log.info(journey);
     	Optional<ReturnMessage> message = service.assignJourney(journey)  ;  	
     	return responseBuilder(message);
@@ -55,6 +57,8 @@ public class CabifyApplication {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     public Response cars(String cars) {
+    	if (cars==null)
+    	    throw new javax.ws.rs.BadRequestException();
     	log.info(cars);
     	Optional<ReturnMessage> message = service.createAvailableCars(cars);
     	return responseBuilder(message);
@@ -78,6 +82,8 @@ public class CabifyApplication {
     @POST
     @Path("/locate")
     public Response locate(@FormParam("ID") String id ){
+    	if (id==null)
+    	    throw new javax.ws.rs.BadRequestException();
     	log.info("locate:", id);
     	Optional<ReturnMessage> message = service.locateJourney(id);    	
     	return responseBuilder(message);
@@ -87,6 +93,8 @@ public class CabifyApplication {
     @POST
     @Path("/dropoff")
     public Response dropoff(@FormParam("ID") String id ){
+    	if (id==null)
+    	    throw new javax.ws.rs.BadRequestException();
     	log.info("dropoff:", id);
     	Optional<ReturnMessage> message = service.dropOff(id);    	
     	return responseBuilder(message);
