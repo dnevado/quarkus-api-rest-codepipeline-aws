@@ -3,7 +3,7 @@ image: docker:18
 
 variables:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"  
-  CI_DEBUG_TRACE: "true"
+ 
 
 before_script:
   # - export GRADLE_USER_HOME=`pwd`/.gradle

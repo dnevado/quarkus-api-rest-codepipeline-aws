@@ -111,7 +111,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
     	//sendLogTrace(availablecars,"createAvailableCars");
     	serviceReady = Boolean.FALSE;
         log.info("createAvailableCars {}", availablecars); 
-        ReturnMessage message = new ReturnMessage("200","OK");
+        ReturnMessage message = new ReturnMessage("200","OK:"+ availablecars);
         // avoiding overritten of original variable in case of error 
         Map<Long, Car> temporaryAvailableCars = Collections.synchronizedMap(new LinkedHashMap<Long, Car>());
         /* Previous validation of all car entries before processing  */ 
@@ -136,7 +136,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
             	{
             		temporaryAvailableCars.clear();
             		message.setStatusCode("400");
-            		message.setStatusDescription("Bad Request");
+            		message.setStatusDescription("Bad Request:"+ availablecars);
             		log.debug("Error formatting createAvailableCars {}", car); 
             		break;
             	}
@@ -156,7 +156,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
         catch (Exception e)
         {        	
         	message.setStatusCode("400");
-    		message.setStatusDescription("Bad Request");
+    		message.setStatusDescription("Bad Request:"+ availablecars);
     		serviceReady =  Boolean.TRUE;
         }   
 
@@ -208,7 +208,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
     	    if (!isNumeric(groupId))
             {
 	           	message.setStatusCode("400");
-	      		message.setStatusDescription("Bad Request");
+	      		message.setStatusDescription("Bad Request:" +groupId);
       		
             }    	    
     	    else
@@ -222,7 +222,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
     	        	Long  groupSize  = peopleGroups.get(parsedGroupId);    
     	        	peopleGroups.remove(parsedGroupId);
     	        	message.setStatusCode("200");
-    	    		message.setStatusDescription("OK");    		
+    	    		message.setStatusDescription("OK:" +groupId);    		
     	    		// add  new available cars seats
     	    		int finalReservedSeats = foundCar.getReservedSeats() - groupSize.intValue();
     	    		foundCar.setReservedSeats(finalReservedSeats);     	    		       
@@ -232,7 +232,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
 	    catch (Exception e)
 	    {
 	    	message.setStatusCode("400");
-      		message.setStatusDescription("Bad Request");
+      		message.setStatusDescription("Bad Request:" +groupId);
 	    }
         return Optional.of(message);
     }
@@ -268,7 +268,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
         	if (syntaxError || previousAssigned)
         	{
         		message.setStatusCode("400");
-        		message.setStatusDescription("Bad Request");
+        		message.setStatusDescription("Bad Request" + journey);
         	}
         	else
         	{	  		
@@ -294,14 +294,14 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
 		        if (foundCarId==-1)
 		        {
 		        	message.setStatusCode("400");
-	        		message.setStatusDescription("Bad Request");
+	        		message.setStatusDescription("Bad Request" + journey);
 		        }
         	}
 		}
 		catch (Exception e)
         {
 	    	message.setStatusCode("400");
-	  		message.setStatusDescription("Bad Request");
+	  		message.setStatusDescription("Bad Request"+ journey);
         }
                         
         return Optional.of(message);
@@ -324,7 +324,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
     	//sendLogTrace(groupId,"locateJourney");
         ReturnMessage message = new ReturnMessage("400", "Bad Request:" + groupId);
         Long parsedGroupId;
-        try 
+        try 	
         {
     	    if (isNumeric(groupId))
     	    {
@@ -332,7 +332,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
     	    	 if (!this.peopleGroups.containsKey(parsedGroupId))
 		         {	
     	    		 	message.setStatusCode("404");
-    	    		 	message.setStatusDescription("Not Found");
+    	    		 	message.setStatusDescription("Not Found"+ groupId);
 		         }
     	    	 else
     	    	 {   
@@ -348,7 +348,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
 			          else
 			          {
 			        	  message.setStatusCode("204");
-	    	    		  message.setStatusDescription("No Content");
+	    	    		  message.setStatusDescription("No Content"+ groupId);
 			          }
     	    	 }
 		          
@@ -357,7 +357,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
 		catch (Exception e)
         {
 	    	message.setStatusCode("400");
-	  		message.setStatusDescription("Bad Request");
+	  		message.setStatusDescription("Bad Request"+ groupId);
         }
         
       
