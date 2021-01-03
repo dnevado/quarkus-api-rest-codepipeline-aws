@@ -23,13 +23,7 @@ import static org.hamcrest.Matchers.containsString;
 public class CabifyApplicationTest {
 
     
-    @Test
-    public void test200OKEndpoint() {
-        given()
-                .when().put("/cars")
-                .then()
-                .statusCode(200);
-    }
+  
     @Test
     @Order(1)
     public void testCreateCarsEndpoint() {    	
@@ -61,7 +55,7 @@ public class CabifyApplicationTest {
     		.contentType(ContentType.JSON).body(carsPayLoad)        		
             .when().put("/cars")
             .then()
-            .statusCode(200).body(containsString("Bad Request"));
+            .statusCode(400).body(containsString("Bad Request"));
     
     }
     
@@ -99,7 +93,7 @@ public class CabifyApplicationTest {
     		.contentType(ContentType.JSON).body(peoplePayLoad)        		
             .when().post("/journey")
             .then()
-            .statusCode(200).body(containsString("Bad Request"));
+            .statusCode(400).body(containsString("Bad Request"));
     }
     
     @Test
@@ -120,7 +114,7 @@ public class CabifyApplicationTest {
         		.param("ID", 99999999)
                 .when().post("/dropoff")
                 .then()
-                	.statusCode(200).body(containsString("Not Found"));                	
+                	.statusCode(404).body(containsString("Not Found"));                	
         
 
     }
@@ -131,7 +125,7 @@ public class CabifyApplicationTest {
         		.param("ID", -1)
                 .when().post("/dropoff")
                 .then()
-                	.statusCode(200).body(containsString("Bad Request"));                	
+                	.statusCode(400).body(containsString("Bad Request"));                	
         
 
     }
@@ -152,11 +146,13 @@ public class CabifyApplicationTest {
     @Test
     public void test404OKLocate() {
     	
-        given()
+        given()        		
         		.param("ID", "-1")
-                .when().post("/locate")
+        		 .when().post("/locate")
+        		/* .header("Content-Type", "	/x-www-form-urlencoded")
+                .when().post("/locate") */
                 .then()                	
-                	.statusCode(200).body(containsString("Bad Request"));
+                	.statusCode(400).body(containsString("Bad Request"));
         
 
     }

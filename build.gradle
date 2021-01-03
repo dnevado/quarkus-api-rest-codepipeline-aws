@@ -8,12 +8,17 @@ repositories {
     mavenCentral()
 }
 
+
+
 dependencies {
+  	implementation 'io.quarkus:quarkus-resteasy'
+    implementation 'io.quarkus:quarkus-resteasy-jsonb'
     implementation 'io.quarkus:quarkus-container-image-jib'
     implementation 'io.quarkus:quarkus-kubernetes'
     implementation 'io.quarkus:quarkus-kubernetes-config'
     implementation 'io.quarkus:quarkus-jsonb'
     implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'javax.ws.rs:javax.ws.rs-api:2.0'
     implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.930')
     implementation 'com.amazonaws:aws-java-sdk-s3'
     implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")

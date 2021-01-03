@@ -27,6 +27,12 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 
+import javax.ws.rs.core.Response;
+
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.regions.Regions;
@@ -174,6 +180,7 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
         return Optional.of(message);
     }
     
+        
     private boolean isNumeric(String value)
     {
     	return  Stream.of(value)
@@ -355,6 +362,11 @@ public class CabifyRepositoryInMemory implements CabifyRepository {
         
       
         return Optional.of(message);
+	}
+	@Override
+	public Optional<ReturnMessage> test(String test) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 
