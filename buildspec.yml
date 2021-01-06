@@ -22,7 +22,7 @@ phases:
   install:
     commands: 
       - yum update -y
-      - yum install -y software-properties-common
+      #- yum install -y software-properties-common
       - add-apt-repository ppa:openjdk-r/ppa
       - yum update -y
       - yum install -y openjdk-11-jdk
