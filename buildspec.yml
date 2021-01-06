@@ -20,10 +20,10 @@ version: 0.2
             
 phases:
   install:
-    commands:
-      - apt-get update -y
-      - apt-get install -y software-properties-common
+    commands: 
+      - yum update -y
+      - yum install -y software-properties-common
       - add-apt-repository ppa:openjdk-r/ppa
-      - apt-get update -y
-      - apt-get install -y openjdk-11-jdk
-      - apt-get install -y gradle
+      - yum update -y
+      - yum install -y openjdk-11-jdk
+      - yum install -y gradle
