@@ -25,5 +25,5 @@ phases:
       #- yum install -y software-properties-common
       #- add-apt-repository ppa:openjdk-r/ppa
       #- yum update -y
-      - yum install -y openjdk-11-jdk
+      - yum install java-11-openjdk-devel
       - yum install -y gradle
