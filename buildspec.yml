@@ -21,7 +21,7 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      java: openjdk11      
+      java: corretto11      
     commands: 
       - yum update -y
       #- yum install -y software-properties-common
