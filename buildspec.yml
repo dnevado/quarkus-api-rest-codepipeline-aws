@@ -20,10 +20,12 @@ version: 0.2
             
 phases:
   install:
+    runtime-versions:
+      java: openjdk11      
     commands: 
       - yum update -y
       #- yum install -y software-properties-common
       #- add-apt-repository ppa:openjdk-r/ppa
       #- yum update -y
-      - amazon-linux-extras install java-openjdk11 
+      #- amazon-linux-extras install java-openjdk11 
       - yum install -y gradle
