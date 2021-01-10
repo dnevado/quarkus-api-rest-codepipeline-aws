@@ -23,7 +23,10 @@ phases:
     runtime-versions:
       java: corretto11      
     commands: 
-      - yum update -y
+  build:
+    commands:
+      - ./gradlew build
+      #- yum update -y
       #- yum install -y software-properties-common
       #- add-apt-repository ppa:openjdk-r/ppa
       #- yum update -y
