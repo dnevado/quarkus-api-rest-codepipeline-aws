@@ -28,4 +28,4 @@ phases:
       #- add-apt-repository ppa:openjdk-r/ppa
       #- yum update -y
       #- amazon-linux-extras install java-openjdk11 
-      - yum install -y gradle
+      #- yum install -y gradle
